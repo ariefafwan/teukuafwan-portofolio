@@ -10,4 +10,5 @@ class MainSkill extends Model
     use Uuids;
     protected $table = 'main_skill';
     protected $primaryKey = 'uuid';
+    protected $guarded = [];
 }

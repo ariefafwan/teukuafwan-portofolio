@@ -32,9 +32,19 @@ class ProfileController extends ApiController
             DB::beginTransaction();
             $profile = $this->profile_repo->first();
 
-            if ($request->hasFile('gambar')) {
+            if ($request->hasFile('gambar_profil')) {
                 Helper::delete_file($profile->gambar);
-                $data['image'] = Helper::upload_file($request->file('image'), $this->profile_repo->upload_directory);
+                $data['gambar_profil'] = Helper::upload_file($request->file('gambar_profil'), $this->profile_repo->upload_directory);
+            }
+
+            if ($request->hasFile('avatar')) {
+                Helper::delete_file($profile->avatar);
+                $data['avatar'] = Helper::upload_file($request->file('avatar'), $this->profile_repo->upload_directory);
+            }
+
+            if ($request->hasFile('resume')) {
+                Helper::delete_file($profile->resume);
+                $data['resume'] = Helper::upload_file($request->file('resume'), $this->profile_repo->upload_directory);
             }
 
             $this->profile_repo->update($profile->uuid, $data);

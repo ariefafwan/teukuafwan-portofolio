@@ -19,13 +19,13 @@ class ProfileUpdateRequest extends ApiRequest
             'nama_panggilan' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'deskripsi' => 'required|string|max:65535',
-            'resume' => 'nullable|file|mimes:pdf|max:' . env('DOCUMENT_UPLOAD_SIZE'),
-            'gambar_profil' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:' . env('IMAGE_UPLOAD_SIZE'),
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:' . env('IMAGE_UPLOAD_SIZE'),
-            'linkedin' => 'required|url',
-            'github' => 'required|url',
-            'instagram' => 'required|url',
-            'kaggle' => 'required|url',
+            'resume' => 'nullable|file|mimes:pdf',
+            'gambar_profil' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp',
+            'linkedin' => 'nullable|url',
+            'github' => 'nullable|url',
+            'instagram' => 'nullable|url',
+            'kaggle' => 'nullable|url',
         ];
     }
 }

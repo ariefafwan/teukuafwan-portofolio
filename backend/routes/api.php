@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\Api\EducationController;
+use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\MainSkillController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\SkillController;
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/home', [HomeController::class, 'index']);
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
@@ -16,7 +19,7 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::group(['prefix' => 'profile', 'as' => 'profile.'], function () {
             Route::get('/', [ProfileController::class, 'index']);
-            Route::post('/update/{uuid}', [ProfileController::class, 'update']);
+            Route::post('/update', [ProfileController::class, 'update']);
         });
         Route::group(['prefix' => 'education', 'as' => 'education.'], function () {
             Route::get('/', [EducationController::class, 'index']);

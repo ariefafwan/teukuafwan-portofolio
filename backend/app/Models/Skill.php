@@ -10,6 +10,7 @@ class Skill extends Model
     use Uuids;
     protected $table = 'skill';
     protected $primaryKey = 'uuid';
+    protected $guarded = [];
 
     public function dataProject()
     {

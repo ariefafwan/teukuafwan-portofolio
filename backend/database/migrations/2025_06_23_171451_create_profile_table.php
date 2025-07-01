@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('uuid')->primary();
             $table->string('nama');
             $table->string('nama_panggilan');
+            $table->string('moto_profesional');
             $table->string('email');
             $table->text('deskripsi');
             $table->string('resume');

@@ -10,4 +10,5 @@ class Profile extends Model
     use Uuids;
     protected $table = 'profile';
     protected $primaryKey = 'uuid';
+    protected $guarded = [];
 }

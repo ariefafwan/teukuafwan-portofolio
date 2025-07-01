@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
 
         Profile::create([
             'nama' => 'Teuku M Arief Afwan',
-            'nama_panggilan' => 'Afwan',
+            'moto_profesional' => 'Code Enthusiast',
+            'nama_panggilan' => 'Teuku Afwan',
             'email' => 'tmariefafwan@gmail.com',
             'deskripsi' => 'I am Afwan, 23 years old, a Bachelor of Engineering, Majoring in Information Systems with a GPA of 3.62 & Postgraduate Student Majoring in Information Systems. Mastering Web development, using PHP Framework Laravel & Javascript (Vue Js, Nuxt Js, React) as my main programming, also proficient in predictive data processing and analysis with Python, also AI Development. I am also able to work well together, committed and responsible.',
             'resume' => 'assets/profile/resume.pdf',

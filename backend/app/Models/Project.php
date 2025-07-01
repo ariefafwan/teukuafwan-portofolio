@@ -10,6 +10,7 @@ class Project extends Model
     use Uuids;
     protected $table = 'project';
     protected $primaryKey = 'uuid';
+    protected $guarded = [];
 
     public function dataSkill()
     {
@@ -28,7 +29,7 @@ class Project extends Model
             });
         })->when($filters['status'] ?? false, function ($q) use ($filters) {
             $q->where('status', $filters['status']);
-        })->when($filters['skill_uuid'], function ($query) use ($filters) {
+        })->when($filters['skill_uuid'] ?? false, function ($query) use ($filters) {
             $query->where('skill_uuid', $filters['skill_uuid']);
         })
             ->when($filters['order'] ?? false, function ($q) use ($filters) {
