@@ -2,34 +2,59 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const AxiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "multipart/form-data",
+  },
 });
 
-// Tambahkan token dari localStorage ke setiap request
 AxiosInstance.interceptors.request.use(
-    (config) => {
-        const token = Cookies.get("token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
+  (config) => {
+    const token = Cookies.get("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
-// Cek jika ada token baru di response header, simpan kembali
 AxiosInstance.interceptors.response.use(
-    (response) => {
-        const newToken = response.headers["authorization"];
-        if (newToken) {
-            const tokenOnly = newToken.replace("Bearer ", "");
-            Cookies.set("token", tokenOnly, { expires: 1 });
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes("/refresh-token")) {
+      originalRequest._retry = true;
+
+      try {
+        // Hit refresh token endpoint
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/refresh-token`,
+          {},
+          {
+            withCredentials: true,
+          }
+        );
+
+        const newAccessToken = res.data.data.accessToken;
+
+        if (newAccessToken) {
+          Cookies.set("token", newAccessToken, { expires: 1 });
+
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return AxiosInstance(originalRequest);
         }
-        return response;
-    },
-    (error) => {
-        return Promise.reject(error);
+      } catch (refreshError) {
+        window.location.href = "/auth";
+        return Promise.reject(refreshError);
+      }
     }
+
+    return Promise.reject(error);
+  }
 );
 
 export default AxiosInstance;

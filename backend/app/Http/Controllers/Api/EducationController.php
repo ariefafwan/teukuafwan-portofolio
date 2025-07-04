@@ -23,11 +23,22 @@ class EducationController extends ApiController
             ->successResponse($data);
     }
 
+    public function show($uuid)
+    {
+        $data = $this->education_repo->find($uuid);
+        return $this
+            ->successResponse($data);
+    }
+
     public function store(EdacationRequest $request)
     {
         $data = $request->validated();
         DB::beginTransaction();
         try {
+            $education = $this->education_repo->where('tipe', $data['tipe'])->get();
+            if ($education->count() > 0) {
+                return $this->errorResponse(message: 'Data sudah ada');
+            }
             $data = $this->education_repo->create($data);
             DB::commit();
             return $this->successResponse();

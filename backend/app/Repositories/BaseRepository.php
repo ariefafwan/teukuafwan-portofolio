@@ -89,4 +89,14 @@ abstract class BaseRepository
 
 		return $saveCopy;
 	}
+
+	public function __call($method, $arguments)
+	{
+		if (method_exists($this->model, $method)) {
+			return $this->model->$method(...$arguments);
+		}
+
+		// atau lempar ke builder
+		return $this->model->$method(...$arguments);
+	}
 }

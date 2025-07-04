@@ -16,7 +16,7 @@ export default function Document() {
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png" />
         <link rel="icon" href="/favicon_io/favicon.ico" />
-        <link rel="manifest" href="/favicon_io/site.webmanifest" />
+        {/* <link rel="manifest" href="/favicon_io/site.webmanifest" /> */}
       </Head>
       <body className="antialiased">
         <Main />

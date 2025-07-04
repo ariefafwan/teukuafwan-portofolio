@@ -12,8 +12,8 @@ class Skill extends Model
     protected $primaryKey = 'uuid';
     protected $guarded = [];
 
-    public function dataProject()
+    public function dataSkillProject()
     {
-        return $this->hasMany(Project::class, 'skill_uuid', 'uuid');
+        return $this->hasMany(SkillProject::class, 'skill_uuid', 'uuid');
     }
 }

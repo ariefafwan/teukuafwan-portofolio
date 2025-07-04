@@ -17,7 +17,7 @@ class MainSkillUpdateRequest extends ApiRequest
         return [
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string|max:65535',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:' . env('IMAGE_UPLOAD_SIZE'),
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp',
         ];
     }
 }

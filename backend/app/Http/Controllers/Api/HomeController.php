@@ -30,13 +30,39 @@ class HomeController extends ApiController
     {
         $filters = request()->all();
         $data = [
-            'education' => $this->education_repo->get(),
+            'educations' => $this->education_repo->get(),
             'profile' => $this->profile_repo->first(),
-            'skill' => $this->skill_repo->get(),
-            'main_skill' => $this->main_skill_repo->get(),
-            'project' => $this->project_repo->all($filters)
+            'skills' => $this->skill_repo->get(),
+            'main_skills' => $this->main_skill_repo->get(),
+            'projects' => $this->project_repo->all($filters)
         ];
 
+        return $this->successResponse($data);
+    }
+
+    public function profile()
+    {
+        $profile = $this->profile_repo->first();
+        return $this->successResponse($profile);
+    }
+
+    public function projects()
+    {
+        $filters = request()->all();
+        $data = [
+            'projects' => $this->project_repo->all($filters),
+            'skills' => $this->skill_repo->get(),
+            'profile' => $this->profile_repo->first(),
+        ];
+        return $this->successResponse($data);
+    }
+
+    public function show_project($slug)
+    {
+        $data = [
+            'project' => $this->project_repo->find_by_slug($slug)->load('skills'),
+            'profile' => $this->profile_repo->first(),
+        ];
         return $this->successResponse($data);
     }
 }

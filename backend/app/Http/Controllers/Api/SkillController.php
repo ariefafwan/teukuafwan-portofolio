@@ -23,6 +23,13 @@ class SkillController extends ApiController
             ->successResponse($data);
     }
 
+    public function show($uuid)
+    {
+        $data = $this->skill_repo->find($uuid);
+        return $this
+            ->successResponse($data);
+    }
+
     public function store(SkillRequest $request)
     {
         $data = $request->validated();

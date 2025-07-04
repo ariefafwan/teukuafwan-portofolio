@@ -19,7 +19,7 @@ class ApiRequest extends FormRequest
 
         throw new HttpResponseException(response()->json([
             'status' => false,
-            'message' => 'Validation errors',
+            'message' => $validator->errors(),
             'errors' => $validator->errors()
         ])->setStatusCode($VALID_FAIL_STATUS_CODE));
     }

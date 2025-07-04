@@ -12,9 +12,9 @@ class Project extends Model
     protected $primaryKey = 'uuid';
     protected $guarded = [];
 
-    public function dataSkill()
+    public function dataSkillProject()
     {
-        return $this->belongsTo(Skill::class, 'skill_uuid', 'uuid');
+        return $this->hasMany(SkillProject::class, 'project_uuid', 'uuid');
     }
 
     public function scopeFilter($query, $filters)

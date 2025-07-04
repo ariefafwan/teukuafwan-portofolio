@@ -10,11 +10,15 @@ use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/home', [HomeController::class, 'index']);
+Route::get('/profile', [HomeController::class, 'profile']);
+Route::get('/projects', [HomeController::class, 'projects']);
+Route::get('/projects/{uuid}', [HomeController::class, 'show_project']);
 
 Route::prefix('auth')->group(function () {
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login'])->name('login');
     // Route::post('register', [AuthController::class, 'register'])->name('register');
-    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('refresh-token', [AuthController::class, 'refresh'])->name('refresh');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::group(['prefix' => 'profile', 'as' => 'profile.'], function () {
@@ -24,18 +28,21 @@ Route::prefix('auth')->group(function () {
         Route::group(['prefix' => 'education', 'as' => 'education.'], function () {
             Route::get('/', [EducationController::class, 'index']);
             Route::post('/store', [EducationController::class, 'store']);
+            Route::get('/show/{uuid}', [EducationController::class, 'show']);
             Route::post('/update/{uuid}', [EducationController::class, 'update']);
             Route::delete('/delete/{uuid}', [EducationController::class, 'destroy']);
         });
         Route::group(['prefix' => 'skill', 'as' => 'skill.'], function () {
             Route::get('/', [SkillController::class, 'index']);
             Route::post('/store', [SkillController::class, 'store']);
+            Route::get('/show/{uuid}', [SkillController::class, 'show']);
             Route::post('/update/{uuid}', [SkillController::class, 'update']);
             Route::delete('/delete/{uuid}', [SkillController::class, 'destroy']);
         });
         Route::group(['prefix' => 'main-skill', 'as' => 'main-skill.'], function () {
             Route::get('/', [MainSkillController::class, 'index']);
             Route::post('/store', [MainSkillController::class, 'store']);
+            Route::get('/show/{uuid}', [MainSkillController::class, 'show']);
             Route::post('/update/{uuid}', [MainSkillController::class, 'update']);
             Route::delete('/delete/{uuid}', [MainSkillController::class, 'destroy']);
         });
@@ -46,7 +53,5 @@ Route::prefix('auth')->group(function () {
             Route::post('/update/{uuid}', [ProjectController::class, 'update']);
             Route::delete('/delete/{uuid}', [ProjectController::class, 'destroy']);
         });
-
-        Route::post('refresh-token', [AuthController::class, 'refresh']);
     });
 });

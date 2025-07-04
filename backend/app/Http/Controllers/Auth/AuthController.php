@@ -9,10 +9,12 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
+use App\Traits\EnumTokenAbility;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends ApiController
 {
@@ -54,8 +56,26 @@ class AuthController extends ApiController
 
     public function refresh(Request $request): JsonResponse
     {
-        $user = Auth::user();
-        $request->user()->tokens()->delete();
+        $refreshToken = $request->cookie('refreshToken');
+        if (!$refreshToken) {
+            return $this->unauthorized();
+        }
+
+        // Cari token di database
+        $token = PersonalAccessToken::findToken($refreshToken);
+
+        if (!$token || !$token->can(EnumTokenAbility::ISSUE_ACCESS_TOKEN->value)) {
+            return $this->unauthorized();
+        }
+
+        $user = $token->tokenable;
+
+        if (!$user) {
+            return $this->unauthorized();
+        }
+        $user->tokens()->delete();
+
+        // Generate token baru
         $tokens = $this->service->generateTokens($user);
 
         return $this->sendResponseWithTokens($tokens);
@@ -100,7 +120,7 @@ class AuthController extends ApiController
     private function sendResponseWithTokens(array $tokens, $body = []): JsonResponse
     {
         $rtExpireTime = config('sanctum.rt_expiration');
-        $cookie = cookie('refreshToken', $tokens['refreshToken'], $rtExpireTime, secure: true);
+        $cookie = cookie('refreshToken', $tokens['refreshToken'], $rtExpireTime, secure: false);
 
         return $this->successResponse(array_merge($body, [
             'accessToken' => $tokens['accessToken']

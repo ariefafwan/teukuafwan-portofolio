@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('education', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
-            $table->enum('tipe', ['sekolah', 'sarjana', 'master', 'doktor'])->unique();
+            $table->enum('tipe', ['Sekolah', 'Sarjana', 'Master', 'Doktor'])->unique();
             $table->string('nama');
             $table->string('jurusan')->nullable();
             $table->year('tahun_masuk');
-            $table->year('tahun_lulus');
-            $table->integer('nilai_kelulusan')->nullable();
+            $table->year('tahun_lulus')->nullable();
+            $table->decimal('nilai_kelulusan', 3, 2)->nullable();
             $table->string('gelar')->nullable();
             $table->timestamps();
         });

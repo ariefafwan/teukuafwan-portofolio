@@ -25,13 +25,20 @@ class MainSkillController extends ApiController
             ->successResponse($data);
     }
 
+    public function show($uuid)
+    {
+        $data = $this->main_skill_repo->find($uuid);
+        return $this
+            ->successResponse($data);
+    }
+
     public function store(MainSkillStoreRequest $request)
     {
         $data = $request->validated();
         DB::beginTransaction();
         try {
-            if ($request->hasFile('image')) {
-                $data['image'] = Helper::upload_file($request->file('image'), $this->main_skill_repo->upload_directory);
+            if ($request->hasFile('gambar')) {
+                $data['gambar'] = Helper::upload_file($request->file('gambar'), $this->main_skill_repo->upload_directory);
             }
             $this->main_skill_repo->create($data);
             DB::commit();
@@ -51,7 +58,7 @@ class MainSkillController extends ApiController
             $main_skill = $this->main_skill_repo->find($uuid);
             if ($request->hasFile('gambar')) {
                 Helper::delete_file($main_skill->gambar);
-                $data['image'] = Helper::upload_file($request->file('image'), $this->main_skill_repo->upload_directory);
+                $data['gambar'] = Helper::upload_file($request->file('gambar'), $this->main_skill_repo->upload_directory);
             }
             $this->main_skill_repo->update($uuid, $data);
             DB::commit();
