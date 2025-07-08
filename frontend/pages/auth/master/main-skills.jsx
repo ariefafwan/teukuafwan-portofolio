@@ -145,9 +145,9 @@ export default function MainSKills() {
             Swal.showLoading();
           },
         });
-        AxiosInstance.delete(`/main-skill/${uuid}`)
+        AxiosInstance.delete(`/main-skill/delete/${uuid}`)
           .then((res) => {
-            setReloadTable(true);
+            setLoader(true);
             Swal.fire({
               title: "Success!",
               text: "Data Berhasil Dihapus.",

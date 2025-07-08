@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('project', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
             $table->string('judul');
-            $table->foreignUuid('skill_project_uuid')->constrained('skill_project')->references('uuid')->onDelete('restrict')->onUpdate('cascade');
             $table->string('slug');
             $table->enum('status', ['Repository', 'Published']);
             $table->string('link');

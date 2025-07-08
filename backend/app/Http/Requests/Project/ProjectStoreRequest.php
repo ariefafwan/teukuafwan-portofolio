@@ -16,9 +16,9 @@ class ProjectStoreRequest extends ApiRequest
     {
         return [
             'judul' => 'required|string|max:255',
-            'skill_uuid' => 'required|exists:skills,uuid',
-            'status' => 'required|in:repository,published',
-            'gambar' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:' . env('IMAGE_UPLOAD_SIZE'),
+            'skill_uuid.*' => 'required|exists:skill,uuid',
+            'status' => 'required|in:Repository,Published',
+            'gambar' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp',
             'link' => 'required|url',
             'tahun' => 'required|date_format:Y',
             'deskripsi' => 'required|string|max:65535',

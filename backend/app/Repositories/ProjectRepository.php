@@ -15,14 +15,16 @@ class ProjectRepository extends BaseRepository
         parent::__construct($project);
     }
 
-    public function all($filters = [], $paginate = 9)
+    public function all($filters = [])
     {
         $className = class_basename($this->model);
         $alias = Str::slug($className);
+        $with = $filters['with'] ?? [];
 
         return $this->model
+            ->with($with)
             ->filter($filters)
-            ->paginate($paginate, ['*'], $alias)
+            ->paginate($filters['paginate'] ?? 9, ['*'], $alias)
             ->withQueryString()
             ->onEachSide(0);
     }

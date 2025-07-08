@@ -50,6 +50,7 @@ Route::prefix('auth')->group(function () {
             Route::get('/', [ProjectController::class, 'index']);
             Route::post('/store', [ProjectController::class, 'store']);
             Route::get('/show/{slug}', [ProjectController::class, 'show']);
+            Route::get('/edit/{uuid}', [ProjectController::class, 'edit']);
             Route::post('/update/{uuid}', [ProjectController::class, 'update']);
             Route::delete('/delete/{uuid}', [ProjectController::class, 'destroy']);
         });

@@ -7,7 +7,7 @@ export const TableData = ({ children, buttonModal, inputsearch, changeSearch, he
     <>
       <table className="w-full text-sm text-left rtl:text-right text-gray-500">
         <caption className="p-5 font-semibold text-left rtl:text-right text-gray-900 bg-white">
-          <p className={(changeSearch != false && buttonModal != false ? "mb-4" : "") + " text-xl"}>{label}</p>
+          <p className={(changeSearch != false && buttonModal != false ? "mb-4" : "mb-2") + " text-xl"}>{label}</p>
           <div
             className={
               "cursor-pointer flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 bg-white" + (changeSearch != false && buttonModal != false ? " pb-4" : "")

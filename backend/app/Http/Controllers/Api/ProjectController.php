@@ -5,25 +5,30 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\Project\ProjectStoreRequest;
 use App\Http\Requests\Project\ProjectUpdateRequest;
+use App\Models\SkillProject;
 use App\Repositories\ProjectRepository;
+use App\Repositories\SkillRepository;
 use App\Utils\Helper;
 use Illuminate\Support\Facades\DB;
 
 class ProjectController extends ApiController
 {
-    protected $project_repo;
+    protected $project_repo, $skill_repo;
 
-    public function __construct(ProjectRepository $project_repo)
+    public function __construct(ProjectRepository $project_repo, SkillRepository $skill_repo)
     {
         $this->project_repo = $project_repo;
+        $this->skill_repo = $skill_repo;
     }
 
     public function index()
     {
         $filters = request()->all();
-        $data = $this->project_repo->all($filters);
+        $filters['with'] = ['dataSkill'];
+        $project = $this->project_repo->all($filters);
+        $skill = $this->skill_repo->get();
         return $this
-            ->successResponse($data);
+            ->successResponse(['project' => $project, 'skill' => $skill]);
     }
 
     public function store(ProjectStoreRequest $request)
@@ -34,7 +39,17 @@ class ProjectController extends ApiController
             if ($request->hasFile('image')) {
                 $data['image'] = Helper::upload_file($request->file('image'), $this->project_repo->upload_directory);
             }
-            $this->project_repo->create($data);
+
+            $skillUuids = $data['skill_uuid'];
+            unset($data['skill_uuid']);
+
+            $project = $this->project_repo->create($data);
+            foreach ($skillUuids as $skill_uuid) {
+                SkillProject::create([
+                    'project_uuid' => $project->uuid,
+                    'skill_uuid' => $skill_uuid
+                ]);
+            }
             DB::commit();
             return $this->successResponse();
         } catch (\Exception $e) {
@@ -46,6 +61,13 @@ class ProjectController extends ApiController
     public function show($slug)
     {
         $data = $this->project_repo->find_by_slug($slug);
+        return $this
+            ->successResponse($data);
+    }
+
+    public function edit($uuid)
+    {
+        $data = $this->project_repo->find($uuid)->load('dataSkill');
         return $this
             ->successResponse($data);
     }

@@ -170,9 +170,9 @@ export default function Educations() {
             Swal.showLoading();
           },
         });
-        AxiosInstance.delete(`/education/${uuid}`)
+        AxiosInstance.delete(`/education/delete/${uuid}`)
           .then((res) => {
-            setReloadTable(true);
+            setLoader(true);
             Swal.fire({
               title: "Success!",
               text: "Data Berhasil Dihapus.",

@@ -34,7 +34,7 @@ export default function LoginPage() {
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.error,
+          text: error.response.data.message,
           icon: "error",
         });
       });

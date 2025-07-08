@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Profile;
+use App\Models\Skill;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -32,6 +33,16 @@ class DatabaseSeeder extends Seeder
             'github' => 'https://github.com/ariefafwan',
             'instagram' => 'https://www.instagram.com/teukuafwan/',
             'kaggle' => 'https://www.kaggle.com/teukumariefafwan',
+        ]);
+
+        Skill::create([
+            'nama' => 'Laravel',
+        ]);
+        Skill::create([
+            'nama' => 'Vue Js',
+        ]);
+        Skill::create([
+            'nama' => 'Nuxt Js',
         ]);
     }
 }

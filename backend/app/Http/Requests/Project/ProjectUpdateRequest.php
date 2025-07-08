@@ -18,7 +18,7 @@ class ProjectUpdateRequest extends ApiRequest
             'judul' => 'required|string|max:255',
             'skill_uuid' => 'required|exists:skills,uuid',
             'status' => 'required|in:repository,published',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:' . env('IMAGE_UPLOAD_SIZE'),
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg',
             'link' => 'required|url',
             'tahun' => 'required|date_format:Y',
             'deskripsi' => 'required|string|max:65535',
