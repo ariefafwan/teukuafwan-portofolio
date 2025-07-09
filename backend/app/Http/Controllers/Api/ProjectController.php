@@ -6,25 +6,29 @@ use App\Http\Controllers\ApiController;
 use App\Http\Requests\Project\ProjectStoreRequest;
 use App\Http\Requests\Project\ProjectUpdateRequest;
 use App\Models\SkillProject;
+use App\Repositories\GambarProjectRepository;
 use App\Repositories\ProjectRepository;
+use App\Repositories\SkillProjectRepository;
 use App\Repositories\SkillRepository;
 use App\Utils\Helper;
 use Illuminate\Support\Facades\DB;
 
 class ProjectController extends ApiController
 {
-    protected $project_repo, $skill_repo;
+    protected $project_repo, $skill_repo, $gambar_project_repo, $skill_project_repo;
 
-    public function __construct(ProjectRepository $project_repo, SkillRepository $skill_repo)
+    public function __construct(ProjectRepository $project_repo, SkillRepository $skill_repo, GambarProjectRepository $gambar_project_repo, SkillProjectRepository $skill_project_repo)
     {
         $this->project_repo = $project_repo;
         $this->skill_repo = $skill_repo;
+        $this->gambar_project_repo = $gambar_project_repo;
+        $this->skill_project_repo = $skill_project_repo;
     }
 
     public function index()
     {
         $filters = request()->all();
-        $filters['with'] = ['dataSkill'];
+        $filters['with'] = ['dataSkill', 'dataGambar'];
         $project = $this->project_repo->all($filters);
         $skill = $this->skill_repo->get();
         return $this
@@ -36,18 +40,24 @@ class ProjectController extends ApiController
         $data = $request->validated();
         DB::beginTransaction();
         try {
-            if ($request->hasFile('image')) {
-                $data['image'] = Helper::upload_file($request->file('image'), $this->project_repo->upload_directory);
-            }
-
             $skillUuids = $data['skill_uuid'];
+            $gambar = $data['gambar'];
             unset($data['skill_uuid']);
+            unset($data['gambar']);
 
             $project = $this->project_repo->create($data);
             foreach ($skillUuids as $skill_uuid) {
-                SkillProject::create([
+                $this->skill_project_repo->create([
                     'project_uuid' => $project->uuid,
                     'skill_uuid' => $skill_uuid
+                ]);
+            }
+
+            foreach ($gambar as $image) {
+                $UploadGambar = Helper::upload_file($image, $this->gambar_project_repo->upload_directory);
+                $gambar = $this->gambar_project_repo->create([
+                    'gambar' => $UploadGambar,
+                    'project_uuid' => $project->uuid
                 ]);
             }
             DB::commit();
@@ -80,12 +90,33 @@ class ProjectController extends ApiController
             DB::beginTransaction();
             $project = $this->project_repo->find($uuid);
 
-            if ($request->hasFile('gambar')) {
-                Helper::delete_file($project->gambar);
-                $data['image'] = Helper::upload_file($request->file('image'), $this->project_repo->upload_directory);
+            $skillUuids = $data['skill_uuid'];
+            $gambar = $data['gambar'] ?? null;
+            unset($data['skill_uuid']);
+            unset($data['gambar']);
+
+            $this->skill_project_repo->delete($project->uuid);
+
+            foreach ($skillUuids as $skill_uuid) {
+                $this->skill_project_repo->create([
+                    'project_uuid' => $project->uuid,
+                    'skill_uuid' => $skill_uuid
+                ]);
+            }
+
+            if (isset($gambar)) {
+                $this->gambar_project_repo->delete($project->uuid);
+                foreach ($gambar as $image) {
+                    $UploadGambar = Helper::upload_file($image, $this->gambar_project_repo->upload_directory);
+                    $gambar = $this->gambar_project_repo->create([
+                        'gambar' => $UploadGambar,
+                        'project_uuid' => $project->uuid
+                    ]);
+                }
             }
 
             $this->project_repo->update($project->uuid, $data);
+
             DB::commit();
             return $this->successResponse();
         } catch (\Exception $e) {
@@ -98,7 +129,7 @@ class ProjectController extends ApiController
     {
         try {
             DB::beginTransaction();
-            $this->project_repo->delete_with_image($uuid);
+            $this->project_repo->delete($uuid);
             DB::commit();
             return $this->successResponse();
         } catch (\Exception $e) {

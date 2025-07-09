@@ -1,6 +1,4 @@
-import Image from "next/image";
 import Link from "next/link";
-import Head from "next/head";
 import fetchData from "@/lib/fetchData";
 import { CardSkills } from "../components/CardSkills";
 import { CardExperience } from "../components/CardExperience";
@@ -10,33 +8,40 @@ import { DefaultLayout } from "../components/layouts/DefaultLayout";
 export const getServerSideProps = async () => {
   try {
     const getHome = await fetchData("/home");
+
     return {
       props: {
         data: getHome.data,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     return {
-      props: {
-        error: error.message,
-      },
+      props: { error: message },
     };
   }
 };
 
-export default function Home(data, error) {
-  const profile = data.data.profile;
-  const educations = data.data.educations;
-  const skills = data.data.skills;
-  const main_skills = data.data.main_skills;
-  const projects = data.data.projects;
+export default function Home(data: any) {
+  const { profile, educations, skills, main_skills, projects } = data.data;
+  const projectData: any[] = projects.data;
+
+  function formatMonthYear(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
+  }
 
   return (
     <DefaultLayout profile={profile} title="Home" index={true}>
       <div data-aos="fade-up" className="mx-auto my-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8 ">
         <div className="w-full mx-auto">
           <div className="grid gap-4 sm:grid-cols-2 place-content-center lg:grid-cols-3">
-            <CardSkills data={"Test"}></CardSkills>
+            {main_skills.map((main_skill: any) => (
+              <CardSkills key={main_skill.uuid} data={main_skill} />
+            ))}
           </div>
         </div>
       </div>
@@ -47,18 +52,18 @@ export default function Home(data, error) {
         </header>
 
         <ol className="relative border-s border-blue-400">
-          <li className="mb-10 ms-4">
-            <div className="absolute w-3.5 h-3.5 bg-blue-600 rounded-full mt-1.5 -start-1.5" />
-            <time className="mb-1 text-sm font-normal leading-none text-gray-400">August 2018 - January 2023</time>
-            <h3 className="text-lg font-semibold text-gray-900">Malikussaleh University</h3>
-            <p className="text-base font-normal text-gray-500">Bachelor of Engineering (S.T.) - Major in Information System - GPA 3.6</p>
-          </li>
-          <li className="ms-4">
-            <div className="absolute w-3.5 h-3.5 bg-blue-600 rounded-full mt-1.5 -start-1.5" />
-            <time className="mb-1 text-sm font-normal leading-none text-gray-400">Febuari 2024 - Present</time>
-            <h3 className="text-lg font-semibold text-gray-900">Diponegoro University</h3>
-            <p className="text-base font-normal text-gray-500">Master of Computer (M.Kom.) - Major in Information System</p>
-          </li>
+          {educations.map((education: any) => (
+            <li key={education.uuid} className="mb-10 ms-4">
+              <div className="absolute w-3.5 h-3.5 bg-blue-600 rounded-full mt-1.5 -start-1.5" />
+              <time className="mb-1 text-sm font-normal leading-none text-gray-400">
+                {formatMonthYear(education.masuk)} {education.lulus ? `- ${formatMonthYear(education.lulus)}` : ""}
+              </time>
+              <h3 className="text-lg font-semibold text-gray-900">{education.nama}</h3>
+              <p className="text-base font-normal text-gray-500">
+                {education.gelar} - Major in {education.jurusan} {education.nilai_kelulusan ? `- GPA: ${education.nilai_kelulusan}` : ""}
+              </p>
+            </li>
+          ))}
         </ol>
       </div>
       <div data-aos="fade-up" className="mx-auto my-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8 ">
@@ -93,22 +98,12 @@ export default function Home(data, error) {
                   <fieldset className="p-3">
                     <legend className="sr-only">Checkboxes</legend>
                     <div className="flex flex-col items-start gap-3">
-                      <label htmlFor="Option1" className="inline-flex items-center gap-3">
-                        <input type="checkbox" value="React" className="size-5 rounded border-gray-300 shadow-sm" id="Option1" />
-                        <span className="text-sm font-medium text-gray-700"> React </span>
-                      </label>
-                      <label htmlFor="Option2" className="inline-flex items-center gap-3">
-                        <input value="React" type="checkbox" className="size-5 rounded border-gray-300 shadow-sm" id="Option2" />
-                        <span className="text-sm font-medium text-gray-700"> Laravel </span>
-                      </label>
-                      <label htmlFor="Option3" className="inline-flex items-center gap-3">
-                        <input value="Machine Learning" type="checkbox" className="size-5 rounded border-gray-300 shadow-sm" id="Option3" />
-                        <span className="text-sm font-medium text-gray-700"> Machine Learning </span>
-                      </label>
-                      <label htmlFor="Option4" className="inline-flex items-center gap-3">
-                        <input type="checkbox" value="Python" className="size-5 rounded border-gray-300 shadow-sm" id="Option4" />
-                        <span className="text-sm font-medium text-gray-700"> Python </span>
-                      </label>
+                      {skills.map((skill: any) => (
+                        <label key={skill.uuid} htmlFor={skill.nama} className="inline-flex items-center gap-3">
+                          <input type="checkbox" value={skill.nama} className="size-5 rounded border-gray-300 shadow-sm" id={skill.name} />
+                          <span className="text-sm font-medium text-gray-700"> {skill.nama} </span>
+                        </label>
+                      ))}
                     </div>
                   </fieldset>
                 </div>
@@ -124,7 +119,11 @@ export default function Home(data, error) {
               </div>
             </div>
           </form>
-          <div className="grid gap-4 sm:grid-cols-2 my-6 lg:grid-cols-3">{projects.length > 0 ?? projects.map((project, index) => <CardProjects main_data={project} key={index}></CardProjects>)}</div>
+          <div className="grid gap-4 sm:grid-cols-2 my-6 lg:grid-cols-3">
+            {projectData.map((data: any) => (
+              <CardProjects key={data.uuid} main_data={data} />
+            ))}
+          </div>
           <div className="w-full mx-auto my-auto inline-flex items-center">
             <Link
               type="button"

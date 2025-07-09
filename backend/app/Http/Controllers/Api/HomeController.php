@@ -29,6 +29,7 @@ class HomeController extends ApiController
     public function index()
     {
         $filters = request()->all();
+        $filters['with'] = ['dataSkill', 'dataGambar'];
         $data = [
             'educations' => $this->education_repo->get(),
             'profile' => $this->profile_repo->first(),
@@ -49,6 +50,7 @@ class HomeController extends ApiController
     public function projects()
     {
         $filters = request()->all();
+        $filters['with'] = ['dataSkill', 'dataGambar'];
         $data = [
             'projects' => $this->project_repo->all($filters),
             'skills' => $this->skill_repo->get(),

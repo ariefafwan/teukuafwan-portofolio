@@ -23,7 +23,7 @@ export const getServerSideProps = async () => {
 export default function ProjectPage(data, error) {
   const profile = data.data.profile;
   const skills = data.data.skills;
-  const projects = data.data.projects;
+  const projects = data.data.projects.data;
 
   return (
     <DefaultLayout profile={profile} title="Projects" index={false}>
@@ -93,7 +93,11 @@ export default function ProjectPage(data, error) {
               </div>
             </div>
           </form>
-          <div className="grid gap-4 sm:grid-cols-2 my-6 lg:grid-cols-3">{projects.length > 0 ?? projects.map((project, i) => <CardProjects key={i} main_data={project} />)}</div>
+          <div className="grid gap-4 sm:grid-cols-2 my-6 lg:grid-cols-3">
+            {projects.map((project) => (
+              <CardProjects key={project.uuid} main_data={project} />
+            ))}
+          </div>
         </header>
       </div>
     </DefaultLayout>

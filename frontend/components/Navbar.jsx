@@ -1,8 +1,6 @@
 import Link from "next/link";
 
 export default function Navbar({ index, profile }) {
-  console.log(profile);
-
   return (
     <>
       {index ? (

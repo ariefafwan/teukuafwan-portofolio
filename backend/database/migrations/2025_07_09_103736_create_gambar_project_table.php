@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('skill_project', function (Blueprint $table) {
+        Schema::create('gambar_project', function (Blueprint $table) {
             $table->uuid()->primary();
-            $table->foreignUuid('skill_uuid')->constrained('skill')->references('uuid')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignUuid('project_uuid')->constrained('project')->references('uuid')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('gambar');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('skill_project');
+        Schema::dropIfExists('gambar_project');
     }
 };

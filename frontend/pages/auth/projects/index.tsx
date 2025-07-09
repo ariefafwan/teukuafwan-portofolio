@@ -11,12 +11,42 @@ import AxiosInstance from "@/utils/axiosInstance";
 import Swal from "sweetalert2";
 import Select from "@/components/Select";
 import { ButtonPagination } from "@/components/ButtonPagination";
+import InputError from "@/components/InputError";
+import { ChangeEvent, FormEvent } from "react";
+
+interface ProjectForm {
+  uuid: string;
+  judul: string;
+  gambar: File[];
+  skill_uuid: any[];
+  status: string;
+  tahun: string;
+  deskripsi: string;
+  link: string;
+}
+
+interface AllData {
+  current_page: number;
+  data: any[];
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  links: any[] | string;
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
+}
 
 export default function MasterProjects() {
-  const [modal, setModal] = useState(false);
-  const [projectForm, setProjectForm] = useState({
+  const [modal, setModal] = useState<boolean>(false);
+  const [projectForm, setProjectForm] = useState<ProjectForm>({
     uuid: "",
     judul: "",
+    gambar: [],
     skill_uuid: [],
     status: "",
     tahun: "",
@@ -24,29 +54,26 @@ export default function MasterProjects() {
     link: "",
   });
 
-  const [pilihanTahun, setPilihanTahun] = useState([]);
-  const [dataSkill, setDataSkill] = useState([
-    {
-      value: "",
-      label: "",
-    },
-  ]);
-  const [filterSkill, setFilterSkill] = useState("");
-  const [search, setSearch] = useState("");
-  const [buttonPage, setButtonPage] = useState([]);
-  let [page, setPage] = useState(1);
-  const [paginate, setPaginate] = useState(10);
-  const [filterTahun, setFilterTahun] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string[] }>({});
 
-  const [allData, setAllData] = useState({
+  const [pilihanTahun, setPilihanTahun] = useState<number[]>([]);
+  const [dataSkill, setDataSkill] = useState<any[]>([]);
+  const [filterSkill, setFilterSkill] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
+  const [buttonPage, setButtonPage] = useState<number[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const paginate: number = 10;
+  const [filterTahun, setFilterTahun] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+
+  const [allData, setAllData] = useState<AllData>({
     current_page: 1,
     data: [],
     first_page_url: "",
     from: 0,
     last_page: 1,
     last_page_url: "",
-    links: "",
+    links: [],
     next_page_url: null,
     path: "",
     per_page: 10,
@@ -55,30 +82,39 @@ export default function MasterProjects() {
     total: 0,
   });
 
+  const [loader, setLoader] = useState<boolean>(true);
+  const [headerModal, setHeaderModal] = useState<string>("");
+  const [reloadTable, setReloadTable] = useState<boolean>(true);
+
   useEffect(() => {
-    const button = Math.min(5, allData.last_page);
-    let first = allData.current_page - Math.floor(button / 2);
+    const buttonCount = Math.min(5, allData.last_page);
+    let first = allData.current_page - Math.floor(buttonCount / 2);
     first = Math.max(first, 1);
-    first = Math.min(first, allData.last_page - button + 1);
-    setButtonPage([...Array(button)].map((k, i) => i + first));
-  }, [allData, setAllData]);
+    first = Math.min(first, allData.last_page - buttonCount + 1);
+    setButtonPage([...Array(buttonCount)].map((_, i) => i + first));
+  }, [allData]);
 
   useEffect(() => {
-    const createYear = (start, stop, step) => Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
-    createYear(new Date().getFullYear(), 2015, -1).map((year) => {
-      setPilihanTahun((prev) => [...prev, year]);
-    });
+    const createYear = (start: number, stop: number, step: number): number[] => Array.from({ length: (start - stop) / Math.abs(step) + 1 }, (_, i) => start + i * step);
+    const years = createYear(new Date().getFullYear(), 2015, -1);
+    setPilihanTahun(years);
   }, []);
-
-  const [loader, setLoader] = useState(true);
-  const [headerModal, setHeaderModal] = useState("");
-  const [reloadTable, setReloadTable] = useState(true);
 
   useEffect(() => {
     setLoader(true);
-    AxiosInstance.get(`/project?page=${page}&paginate=${paginate}&search=${search}&skill_uuid=${filterSkill}&tahun=${filterTahun}&status=${filterStatus}`)
+
+    AxiosInstance.get(`/project`, {
+      params: {
+        page,
+        paginate,
+        search,
+        skill_uuid: filterSkill,
+        tahun: filterTahun,
+        status: filterStatus,
+      },
+    })
       .then((res) => {
-        let data_project = res.data.data.project;
+        const data_project: any = res.data.data.project;
         setAllData({
           current_page: data_project.current_page,
           data: [...data_project.data],
@@ -96,39 +132,44 @@ export default function MasterProjects() {
         });
         setPage(data_project.current_page);
         if (res.data.data.skill.length > 0) {
-          res.data.data.skill.map((data) => {
-            setDataSkill((prev) => [...prev, { value: data.uuid, label: data.nama }]);
-          });
+          const skills: any[] = res.data.data.skill.map((skill: any) => ({
+            value: skill.uuid,
+            label: skill.nama,
+          }));
+          setDataSkill(skills);
         }
+
         setLoader(false);
         setReloadTable(false);
       })
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.message,
+          text: error.response?.data?.message ?? "Terjadi kesalahan",
           icon: "error",
         });
         setReloadTable(false);
         setLoader(false);
       });
-  }, [reloadTable, setReloadTable, page, paginate, search, filterSkill, filterTahun, filterStatus]);
+  }, [reloadTable, page, search, filterSkill, filterTahun, filterStatus]);
 
   useEffect(() => {
-    if (modal == false) {
+    if (!modal) {
       setProjectForm({
         uuid: "",
         judul: "",
+        gambar: [],
         skill_uuid: [],
         status: "",
         tahun: "",
         deskripsi: "",
         link: "",
       });
+      setValidationErrors({});
     }
-  }, [modal, setModal]);
+  }, [modal]);
 
-  const handlerSubmit = (e) => {
+  const handlerSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     Swal.fire({
       title: "Kamu Yakin?",
@@ -146,61 +187,62 @@ export default function MasterProjects() {
             Swal.showLoading();
           },
         });
-        if (projectForm.uuid == "") {
-          AxiosInstance.post(`/project/store`, {
-            ...projectForm,
-            skill_uuid: projectForm.skill_uuid.map((data) => data.value),
+
+        // Prepare payload
+        const payload = {
+          ...projectForm,
+          skill_uuid: projectForm.skill_uuid.map((s) => s.value),
+        } as any;
+
+        const request = projectForm.uuid === "" ? AxiosInstance.post(`/project/store`, payload) : AxiosInstance.post(`/project/update/${projectForm.uuid}`, payload);
+
+        request
+          .then(() => {
+            setReloadTable(true);
+            setModal(false);
+            Swal.fire({
+              title: "Success!",
+              text: projectForm.uuid === "" ? "Data Berhasil Ditambahkan." : "Data Berhasil Diupdate.",
+              icon: "success",
+            });
           })
-            .then((res) => {
-              setReloadTable(false);
-              setModal(false);
+          .catch((error) => {
+            const resErr = error.response?.data;
+            if (resErr?.errors) {
+              setValidationErrors(resErr.errors as Record<string, string[]>);
+
+              const flatMessage = (Object.values(resErr.errors) as string[][]).map((err) => err.join(", ")).join("\n");
+
               Swal.fire({
-                title: "Success!",
-                text: "Data Berhasil Ditambahkan.",
-                icon: "success",
-              });
-            })
-            .catch((error) => {
-              Swal.fire({
-                title: "Error!",
-                text: error.response.data.message,
+                title: "Validation Error",
+                text: flatMessage,
                 icon: "error",
               });
-            });
-        } else {
-          AxiosInstance.post(`/project/update/${projectForm.uuid}`, projectForm)
-            .then((res) => {
-              setReloadTable(false);
-              setModal(false);
-              Swal.fire({
-                title: "Success!",
-                text: "Data Berhasil Diupdate.",
-                icon: "success",
-              });
-            })
-            .catch((error) => {
+            } else {
               Swal.fire({
                 title: "Error!",
-                text: error.response.data.error,
+                text: resErr?.message ?? "Terjadi kesalahan",
                 icon: "error",
               });
-            });
-        }
+            }
+          });
       }
     });
   };
 
-  const editData = (uuid) => {
+  const editData = (uuid: string): void => {
     AxiosInstance.get(`/project/edit/${uuid}`)
       .then((res) => {
+        const data = res.data.data;
         setProjectForm({
-          uuid: res.data.data.uuid,
-          judul: res.data.data.judul,
-          skill_uuid: res.data.data.data_skill.map((data) => ({ value: data.uuid, label: data.nama })),
-          status: res.data.data.status,
-          tahun: res.data.data.tahun,
-          deskripsi: res.data.data.deskripsi,
-          link: res.data.data.link,
+          uuid: data.uuid,
+          judul: data.judul,
+          gambar: [],
+          skill_uuid: data.data_skill.map((s: any) => ({ value: s.uuid, label: s.nama })),
+          status: data.status,
+          tahun: data.tahun,
+          deskripsi: data.deskripsi,
+          link: data.link,
         });
         setHeaderModal("Edit Data");
         setModal(true);
@@ -208,13 +250,13 @@ export default function MasterProjects() {
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.error,
+          text: error.response?.data?.error ?? "Terjadi kesalahan",
           icon: "error",
         });
       });
   };
 
-  const handleDelete = (uuid) => {
+  const handleDelete = (uuid: string): void => {
     Swal.fire({
       title: "Kamu Yakin?",
       text: "Data Akan Dihapus!",
@@ -232,8 +274,8 @@ export default function MasterProjects() {
           },
         });
         AxiosInstance.delete(`/project/delete/${uuid}`)
-          .then((res) => {
-            setReloadTable(false);
+          .then(() => {
+            setReloadTable(true);
             Swal.fire({
               title: "Success!",
               text: "Data Berhasil Dihapus.",
@@ -243,7 +285,7 @@ export default function MasterProjects() {
           .catch((error) => {
             Swal.fire({
               title: "Error!",
-              text: error.response.data.error,
+              text: error.response?.data?.error ?? "Terjadi kesalahan",
               icon: "error",
             });
           });
@@ -251,19 +293,7 @@ export default function MasterProjects() {
     });
   };
 
-  useEffect(() => {
-    if (modal == false) {
-      setProjectForm({
-        uuid: "",
-        judul: "",
-        skill_uuid: [],
-        status: "",
-        tahun: "",
-        deskripsi: "",
-        link: "",
-      });
-    }
-  }, [modal, setModal]);
+  console.log(allData.data);
 
   return (
     <>
@@ -271,17 +301,17 @@ export default function MasterProjects() {
         <div className="w-full px-4 py-2 mt-12">
           <div className="relative overflow-x-auto shadow-xl sm:rounded-lg">
             <TableData
-              head={["Nama", "Aksi", "Skill", "Tahun", "Status", "Link"]}
+              head={["Judul", "Gambar", "Skill", "Tahun", "Status", "Link", "Aksi"]}
               label={"Data Projects"}
               filter={
                 <>
                   <div className="relative">
-                    <Select id="skill" onChange={(value) => setFilterSkill(value)} value={filterSkill} options={dataSkill} />
+                    <Select id="skill" onChange={(value: any) => setFilterSkill(value)} value={filterSkill} options={dataSkill} />
                   </div>
                   <div className="relative">
                     <select
                       value={filterTahun}
-                      onChange={(e) => setFilterTahun(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterTahun(e.target.value)}
                       className="h-full border block appearance-none w-30 text-ellipsis bg-white border-gray-300 text-gray-700 py-2 px-2 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                     >
                       <option value="">Tahun</option>
@@ -297,7 +327,7 @@ export default function MasterProjects() {
                   <div className="relative">
                     <select
                       value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value)}
                       className="h-full border block appearance-none w-full bg-white border-gray-300 text-gray-700 py-2 px-2 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                     >
                       <option value="">Status</option>
@@ -312,10 +342,8 @@ export default function MasterProjects() {
                   </div>
                 </>
               }
-              pagination={paginate}
-              changePagination={(e) => setPaginate(e.target.value)}
               inputsearch={search}
-              changeSearch={(e) => setSearch(e.target.value)}
+              changeSearch={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
               buttonModal={() => {
                 setHeaderModal("Tambah Data");
                 setModal(true);
@@ -330,11 +358,14 @@ export default function MasterProjects() {
                           {i + 1}
                         </th>
                         <td className="px-6 py-4 text-black">{all.judul}</td>
+                        <td className="px-6 py-4 text-black">
+                          <img className="w-10 h-10 rounded-full" src={`${process.env.NEXT_PUBLIC_STORAGE_BASE_URL}${all.data_gambar?.[0].gambar}`} alt="Project thumbnail" />
+                        </td>
                         <td className="px-6 py-4 text-black">{all.data_skill.map((skill) => skill.nama).join(", ")}</td>
                         <td className="px-6 py-4 text-black">{all.tahun}</td>
                         <td className="px-6 py-4 text-black">{all.status}</td>
                         <td className="px-6 py-4 text-black">
-                          <a href="{all.link}" target="_blank">
+                          <a href={all.link} target="_blank" className="text-blue-600">
                             Url
                           </a>
                         </td>
@@ -377,8 +408,8 @@ export default function MasterProjects() {
                 total={allData.total}
                 next_page_url={allData.next_page_url}
                 prev_page_url={allData.prev_page_url}
-                nextPage={() => setPage(page++)}
-                prevPage={() => setPage(page--)}
+                nextPage={() => setPage((prev) => prev + 1)}
+                prevPage={() => setPage((prev) => Math.max(prev - 1, 1))}
               >
                 {buttonPage.map((btn, i) => {
                   return (
@@ -418,9 +449,10 @@ export default function MasterProjects() {
               placeholder="Nama..."
               required
             />
+            <InputError name="judul" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
-            <label htmlFor="skill" className="block mb-2 text-sm font-medium text-gray-900">
+            <label htmlFor="skill_uuid" className="block mb-2 text-sm font-medium text-gray-900">
               Skill
             </label>
             <Select
@@ -434,6 +466,7 @@ export default function MasterProjects() {
               value={projectForm.skill_uuid}
               options={dataSkill}
             />
+            <InputError name="skill_uuid" errors={validationErrors} />
           </div>
           <div className="w-full text-black grid grid-cols-2 gap-4">
             <div className="w-full text-black">
@@ -443,14 +476,16 @@ export default function MasterProjects() {
               <input
                 type="file"
                 id="gambar"
+                multiple
                 onChange={(e) =>
                   setProjectForm({
                     ...projectForm,
-                    gambar: e.target.files[0],
+                    gambar: [...projectForm.gambar, e.target.files?.[0]],
                   })
                 }
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               />
+              <InputError name="gambar" errors={validationErrors} />
             </div>
             <div className="w-full text-black">
               <label htmlFor="link" className="block mb-2 text-sm font-medium text-gray-900">
@@ -470,6 +505,7 @@ export default function MasterProjects() {
                 placeholder="Link..."
                 required
               />
+              <InputError name="link" errors={validationErrors} />
             </div>
           </div>
           <div className="w-full text-black grid grid-cols-2 gap-4">
@@ -497,6 +533,7 @@ export default function MasterProjects() {
                   );
                 })}
               </select>
+              <InputError name="tahun" errors={validationErrors} />
             </div>
             <div className="w-full text-black">
               <label htmlFor="status" className="block mb-2 text-sm font-medium text-gray-900">
@@ -517,6 +554,7 @@ export default function MasterProjects() {
                 <option value="Repository">Repository</option>
                 <option value="Publish">Publish</option>
               </select>
+              <InputError name="status" errors={validationErrors} />
             </div>
           </div>
           <div className="w-full text-black">
@@ -524,7 +562,6 @@ export default function MasterProjects() {
               Deskripsi
             </label>
             <textarea
-              type="text"
               id="deskripsi"
               value={projectForm.deskripsi}
               onChange={(e) =>
@@ -537,6 +574,7 @@ export default function MasterProjects() {
               rows={4}
               required
             />
+            <InputError name="deskripsi" errors={validationErrors} />
           </div>
         </ModalPrimary>
       </DashboardLayout>

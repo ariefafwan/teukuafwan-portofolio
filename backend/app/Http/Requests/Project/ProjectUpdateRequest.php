@@ -16,9 +16,11 @@ class ProjectUpdateRequest extends ApiRequest
     {
         return [
             'judul' => 'required|string|max:255',
-            'skill_uuid' => 'required|exists:skills,uuid',
-            'status' => 'required|in:repository,published',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg',
+            'skill_uuid' => 'required|array',
+            'skill_uuid.*' => 'string|exists:skill,uuid',
+            'status' => 'required|in:Repository,Published',
+            'gambar' => 'nullable|array',
+            'gambar.*' => 'image|mimes:jpeg,png,jpg',
             'link' => 'required|url',
             'tahun' => 'required|date_format:Y',
             'deskripsi' => 'required|string|max:65535',

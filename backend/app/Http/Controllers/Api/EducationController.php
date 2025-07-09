@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\ApiController;
-use App\Http\Requests\Education\EdacationRequest;
+use App\Http\Requests\Education\EducationRequest;
 use App\Repositories\EducationRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +30,7 @@ class EducationController extends ApiController
             ->successResponse($data);
     }
 
-    public function store(EdacationRequest $request)
+    public function store(EducationRequest $request)
     {
         $data = $request->validated();
         DB::beginTransaction();
@@ -48,7 +48,7 @@ class EducationController extends ApiController
         }
     }
 
-    public function update(EdacationRequest $request, $uuid)
+    public function update(EducationRequest $request, $uuid)
     {
         $data = $request->validated();
 

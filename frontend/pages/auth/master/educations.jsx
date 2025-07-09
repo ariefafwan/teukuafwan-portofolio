@@ -18,20 +18,11 @@ export default function Educations() {
     tipe: "",
     nama: "",
     jurusan: "",
-    tahun_masuk: "",
-    tahun_lulus: "",
+    masuk: "",
+    lulus: "",
     nilai_kelulusan: "",
     gelar: "",
   });
-
-  const [pilihanTahun, setPilihanTahun] = useState([]);
-
-  useEffect(() => {
-    const createYear = (start, stop, step) => Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
-    createYear(new Date().getFullYear(), 2015, -1).map((year) => {
-      setPilihanTahun((prev) => [...prev, year]);
-    });
-  }, []);
 
   const [loader, setLoader] = useState(true);
   const [headerModal, setHeaderModal] = useState("");
@@ -61,8 +52,8 @@ export default function Educations() {
         tipe: "",
         nama: "",
         jurusan: "",
-        tahun_masuk: "",
-        tahun_lulus: "",
+        masuk: "",
+        lulus: "",
         nilai_kelulusan: "",
         gelar: "",
       });
@@ -136,8 +127,8 @@ export default function Educations() {
           tipe: res.data.data.tipe,
           nama: res.data.data.nama,
           jurusan: res.data.data.jurusan,
-          tahun_masuk: res.data.data.tahun_masuk,
-          tahun_lulus: res.data.data.tahun_lulus,
+          masuk: res.data.data.masuk,
+          lulus: res.data.data.lulus,
           nilai_kelulusan: res.data.data.nilai_kelulusan,
           gelar: res.data.data.gelar,
         });
@@ -197,8 +188,8 @@ export default function Educations() {
         tipe: "",
         nama: "",
         jurusan: "",
-        tahun_masuk: "",
-        tahun_lulus: "",
+        masuk: "",
+        lulus: "",
         nilai_kelulusan: "",
         gelar: "",
       });
@@ -232,8 +223,8 @@ export default function Educations() {
                         <td className="px-6 py-4 text-black">{all.nama}</td>
                         <td className="px-6 py-4 text-black">{all.tipe}</td>
                         <td className="px-6 py-4 text-black">{all.jurusan}</td>
-                        <td className="px-6 py-4 text-black">{all.tahun_masuk}</td>
-                        <td className="px-6 py-4 text-black">{all.tahun_lulus}</td>
+                        <td className="px-6 py-4 text-black">{all.masuk.toLocaleString("default", { month: "long" })}</td>
+                        <td className="px-6 py-4 text-black">{all.lulus}</td>
                         <td className="px-6 py-4 text-black">{all.nilai_kelulusan}</td>
                         <td className="px-6 py-4 text-black">{all.gelar}</td>
                         <td className="px-6 py-4 text-black">
@@ -333,54 +324,41 @@ export default function Educations() {
             />
           </div>
           <div className="w-full text-black">
-            <label htmlFor="tahun_masuk" className="block mb-2 text-sm font-medium text-gray-900">
+            <label htmlFor="masuk" className="block mb-2 text-sm font-medium text-gray-900">
               Tahun Masuk
             </label>
-            <select
-              value={eduForm.tahun_masuk}
-              id="tahun_masuk"
+            <input
+              type="date"
+              id="masuk"
+              value={eduForm.masuk}
               onChange={(e) =>
                 setEduForm({
                   ...eduForm,
-                  tahun_masuk: e.target.value,
+                  masuk: e.target.value,
                 })
               }
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+              placeholder="Tahun Masuk..."
               required
-            >
-              {pilihanTahun.map((tahun) => {
-                return (
-                  <option value={tahun} key={tahun}>
-                    {tahun}
-                  </option>
-                );
-              })}
-            </select>
+            />
           </div>
           <div className="w-full text-black">
-            <label htmlFor="tahun_lulus" className="block mb-2 text-sm font-medium text-gray-900">
+            <label htmlFor="lulus" className="block mb-2 text-sm font-medium text-gray-900">
               Tahun Lulus
             </label>
-            <select
-              value={eduForm.tahun_lulus}
-              id="tahun_lulus"
+            <input
+              type="date"
+              id="lulus"
+              value={eduForm.lulus}
               onChange={(e) =>
                 setEduForm({
                   ...eduForm,
-                  tahun_lulus: e.target.value,
+                  lulus: e.target.value,
                 })
               }
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-            >
-              <option value="">Belum Lulus</option>
-              {pilihanTahun.map((tahun) => {
-                return (
-                  <option value={tahun} key={tahun}>
-                    {tahun}
-                  </option>
-                );
-              })}
-            </select>
+              placeholder="Tahun Lulus..."
+            />
           </div>
           <div className="w-full text-black">
             <label htmlFor="nilai_kelulusan" className="block mb-2 text-sm font-medium text-gray-900">

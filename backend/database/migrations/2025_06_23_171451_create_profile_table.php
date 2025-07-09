@@ -20,7 +20,6 @@ return new class extends Migration
             $table->text('deskripsi');
             $table->string('resume');
             $table->string('gambar_profil');
-            $table->string('avatar');
             $table->string('linkedin');
             $table->string('github');
             $table->string('instagram');

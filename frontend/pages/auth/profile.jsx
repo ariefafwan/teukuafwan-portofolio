@@ -38,7 +38,6 @@ export default function Profile({ data }, error) {
     deskripsi: data.deskripsi,
     resume: null,
     gambar_profil: null,
-    avatar: null,
     linkedin: data.linkedin,
     github: data.github,
     instagram: data.instagram,
@@ -178,26 +177,26 @@ export default function Profile({ data }, error) {
         </div>
       </div>
       <ModalPrimary header={"Editar Profile"} open={modal} submitAction={handlerSubmit} closeModal={() => setModal(false)}>
+        <div className="w-full text-black">
+          <label htmlFor="nama" className="block mb-2 text-sm font-medium text-gray-900">
+            Nama
+          </label>
+          <input
+            type="text"
+            id="nama"
+            value={formProfile.nama}
+            onChange={(e) =>
+              setFormProfile({
+                ...formProfile,
+                nama: e.target.value,
+              })
+            }
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+            placeholder="Nama..."
+            required
+          />
+        </div>
         <div className="w-full text-black grid grid-cols-2 gap-2">
-          <div className="w-full text-black">
-            <label htmlFor="nama" className="block mb-2 text-sm font-medium text-gray-900">
-              Nama
-            </label>
-            <input
-              type="text"
-              id="nama"
-              value={formProfile.nama}
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  nama: e.target.value,
-                })
-              }
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-              placeholder="Nama..."
-              required
-            />
-          </div>
           <div className="w-full text-black">
             <label htmlFor="nama_panggilan" className="block mb-2 text-sm font-medium text-gray-900">
               Nama Panggilan
@@ -215,24 +214,6 @@ export default function Profile({ data }, error) {
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Nama Panggilan..."
               required
-            />
-          </div>
-        </div>
-        <div className="w-full text-black grid grid-cols-2 gap-2">
-          <div className="w-full text-black">
-            <label htmlFor="resume" className="block mb-2 text-sm font-medium text-gray-900">
-              Resume
-            </label>
-            <input
-              type="file"
-              id="resume"
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  resume: e.target.files[0],
-                })
-              }
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
             />
           </div>
           <div className="w-full text-black">
@@ -272,16 +253,16 @@ export default function Profile({ data }, error) {
             />
           </div>
           <div className="w-full text-black">
-            <label htmlFor="avatar" className="block mb-2 text-sm font-medium text-gray-900">
-              Avatar
+            <label htmlFor="resume" className="block mb-2 text-sm font-medium text-gray-900">
+              Resume
             </label>
             <input
               type="file"
-              id="avatar"
+              id="resume"
               onChange={(e) =>
                 setFormProfile({
                   ...formProfile,
-                  avatar: e.target.files[0],
+                  resume: e.target.files[0],
                 })
               }
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"

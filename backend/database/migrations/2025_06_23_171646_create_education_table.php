@@ -16,8 +16,8 @@ return new class extends Migration
             $table->enum('tipe', ['Sekolah', 'Sarjana', 'Master', 'Doktor'])->unique();
             $table->string('nama');
             $table->string('jurusan')->nullable();
-            $table->year('tahun_masuk');
-            $table->year('tahun_lulus')->nullable();
+            $table->date('masuk');
+            $table->date('lulus')->nullable();
             $table->decimal('nilai_kelulusan', 3, 2)->nullable();
             $table->string('gelar')->nullable();
             $table->timestamps();

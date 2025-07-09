@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('slug');
             $table->enum('status', ['Repository', 'Published']);
             $table->string('link');
-            $table->string('gambar');
             $table->year('tahun');
             $table->text('deskripsi');
             $table->timestamps();

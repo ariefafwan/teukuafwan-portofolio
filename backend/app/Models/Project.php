@@ -23,6 +23,11 @@ class Project extends Model
         return $this->belongsToMany(Skill::class, 'skill_project', 'project_uuid', 'skill_uuid', 'uuid', 'uuid');
     }
 
+    public function dataGambar()
+    {
+        return $this->hasMany(GambarProject::class, 'project_uuid', 'uuid');
+    }
+
     public function scopeFilter($query, $filters)
     {
         $query->when($filters['search'] ?? false, function ($q) use ($filters) {

@@ -2,17 +2,20 @@
 
 namespace App\Repositories;
 
+use App\Models\GambarProject;
 use App\Models\Project;
 use App\Utils\Helper;
 use Illuminate\Support\Str;
 
 class ProjectRepository extends BaseRepository
 {
-    public $upload_directory = 'assets/project';
+    protected $gambar_project_repo, $skill_project_repo;
 
-    public function __construct(Project $project)
+    public function __construct(Project $project, GambarProjectRepository $gambar_project_repo, SkillProjectRepository $skill_project_repo)
     {
         parent::__construct($project);
+        $this->gambar_project_repo = $gambar_project_repo;
+        $this->skill_project_repo = $skill_project_repo;
     }
 
     public function all($filters = [])
@@ -34,10 +37,9 @@ class ProjectRepository extends BaseRepository
         return $this->model->where('slug', $slug)->first();
     }
 
-    public function delete_with_image($uuid)
+    public function delete($uuid)
     {
-        $project = $this->model->find($uuid);
-        Helper::delete_file($project->gambar);
-        return $project->delete();
+        $this->gambar_project_repo->delete($uuid);
+        return $this->model->where('uuid', $uuid)->delete();
     }
 }
