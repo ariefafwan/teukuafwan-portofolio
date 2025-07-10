@@ -1,9 +1,7 @@
+// import Link from "next/link";
+import { CardProjects } from "@/components/CardProjects";
 import fetchData from "@/lib/fetchData";
-import { CardSkills } from "../components/CardSkills";
-import { CardExperience } from "../components/CardExperience";
-import { CardProjects } from "../components/CardProjects";
-import { DefaultLayout } from "../components/layouts/DefaultLayout";
-// import { useRouter } from "next/router";
+import { DefaultLayout } from "../../components/layouts/DefaultLayout";
 import { useState } from "react";
 import { ChangeEvent, FormEvent } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
@@ -35,21 +33,13 @@ export const getServerSideProps = async (context: any) => {
   }
 };
 
-export default function Home({ data, filterSearch, filterSkill, filterOrder }: any) {
-  const { profile, educations, skills, main_skills, projects } = data;
+export default function ProjectsPages({ data, filterSearch, filterSkill, filterOrder }: any) {
+  const { profile, skills, projects } = data;
   const projectData: any[] = projects.data;
 
   const [localSkill, setLocalSkill] = useState<string[]>(filterSkill || []);
   const [localSearch, setLocalSearch] = useState<string>(filterSearch || "");
   const [localOrder, setLocalOrder] = useState<string>(filterOrder || "");
-
-  const formatMonthYear = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
-      month: "long",
-      year: "numeric",
-    });
-  };
 
   const aturFilterSkill = (e: ChangeEvent<HTMLInputElement>, uuid: string) => {
     if (e.target.checked) {
@@ -73,51 +63,13 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
   };
 
   return (
-    <DefaultLayout profile={profile} title="Home" index={true}>
-      <div data-aos="fade-up" className="mx-auto my-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8 ">
-        <div className="w-full mx-auto">
-          <div className="grid gap-4 sm:grid-cols-2 place-content-center lg:grid-cols-3">
-            {main_skills.map((main_skill: any) => (
-              <CardSkills key={main_skill.uuid} data={main_skill} />
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="mx-auto my-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8 ">
-        <header>
-          <h2 className="text-xl max-lg:text-center font-bold text-gray-500 sm:text-3xl">Education</h2>
-          <p className="my-4 max-lg:text-sm max-lg:text-center max-lg:max-w-full text-gray-500">My academic journey and continuing education</p>
-        </header>
-
-        <ol className="relative border-s border-blue-400">
-          {educations.map((education: any) => (
-            <li key={education.uuid} className="mb-10 ms-4">
-              <div className="absolute w-3.5 h-3.5 bg-blue-600 rounded-full mt-1.5 -start-1.5" />
-              <time className="mb-1 text-sm font-normal leading-none text-gray-400">
-                {formatMonthYear(education.masuk)} {education.lulus ? `- ${formatMonthYear(education.lulus)}` : ""}
-              </time>
-              <h3 className="text-lg font-semibold text-gray-900">{education.nama}</h3>
-              <p className="text-base font-normal text-gray-500">
-                {education.gelar} - Major in {education.jurusan} {education.nilai_kelulusan ? `- GPA: ${education.nilai_kelulusan}` : ""}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </div>
-      <div data-aos="fade-up" className="mx-auto my-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8 ">
-        <header>
-          <h2 className="text-xl max-lg:text-center font-bold text-gray-500 sm:text-3xl">Experience</h2>
-          <div className="grid gap-4 sm:grid-cols-2 place-content-center my-6 lg:grid-cols-3">
-            <CardExperience></CardExperience>
-          </div>
-        </header>
-      </div>
+    <DefaultLayout profile={profile} title="Projects" index={false}>
       <div data-aos="fade-up" className="mx-auto my-auto max-w-screen-xl px-4 pt-8 sm:px-6 lg:px-8 ">
         <header>
-          <h2 className="text-xl max-lg:text-center font-bold text-gray-500 sm:text-3xl">Projects</h2>
-          <div className="max-w-md max-lg:max-w-full my-4 max-lg:grid max-lg:place-content-center">
+          <h2 className="text-xl w-full text-center font-bold text-gray-500 sm:text-3xl">All Projects</h2>
+          <div className="max-w-md max-lg:max-w-full mt-4 mb-0 max-lg:grid max-lg:place-content-center">
             <div className="flex">
-              <details className="group relative shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 ">
+              <details className="group relative shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100">
                 <summary className="flex items-center gap-2 text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 [&::-webkit-details-marker]:hidden hover:cursor-pointer">
                   <span className="text-sm font-medium"> Filters </span>
                   <span className="transition-transform group-open:-rotate-180">
@@ -198,17 +150,17 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
                   id="search"
                   onChange={(e) => setLocalSearch(e.target.value)}
                   value={localSearch}
-                  className="block p-2.5 w-full z-20 hover:bg-gray-200 text-sm text-gray-900 bg-gray-100 rounded-e-lg border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  className="block p-2.5 w-full z-20 hover:bg-gray-200 text-sm text-gray-900 bg-gray-100 rounded-e-lg border-s-gray-50 border-s-2 border border-gray-300"
                   placeholder="Search Project..."
                 />
-                <button onClick={() => setLocalSearch("")} type="button" className={localSearch == "" ? "hidden" : "absolute inset-y-0 end-8 flex items-center pe-3 hover:cursor-pointer"}>
+                <button onClick={() => setLocalSearch("")} type="button" className={localSearch == "" ? "hidden" : "absolute inset-y-0 end-10 flex items-center pe-3 hover:cursor-pointer"}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                   </svg>
                 </button>
                 <button
                   type="submit"
-                  className="absolute top-0 end-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 hover:cursor-pointer"
+                  className="absolute top-0 end-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 hover:cursor-pointer"
                 >
                   <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
@@ -226,7 +178,6 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
           <Splide
             options={{
               type: "loop",
-              perPage: 3,
               gap: "1rem",
               breakpoints: {
                 1024: { perPage: 2 },
@@ -244,18 +195,6 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
               </SplideSlide>
             ))}
           </Splide>
-          <div className="w-full mx-auto my-auto inline-flex items-center">
-            <a
-              type="button"
-              href="/projects"
-              className="text-white mx-auto bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center transition transform hover:-translate-y-1 duration-300 ease-in-out"
-            >
-              See More
-              <svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M1 5h12m0 0L9 1m4 4L9 9" />
-              </svg>
-            </a>
-          </div>
         </header>
       </div>
     </DefaultLayout>

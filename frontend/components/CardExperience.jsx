@@ -1,7 +1,7 @@
 export const CardExperience = () => {
   return (
     <>
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2.5 transition-all duration-400 hover:scale-104 transform">
         <img className="w-8 h-8 rounded-full" src={"/mui.jpeg"} alt="Bonnie Green image" />
         <div className="flex flex-col gap-1">
           <div className="flex flex-col w-full max-w-[326px] leading-1.5 p-4 border-gray-200 bg-gray-100 shadow-lg rounded-e-xl rounded-es-xl">
@@ -24,7 +24,7 @@ export const CardExperience = () => {
           </div>
         </div>
       </div>
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2.5 transition-all duration-400 hover:scale-104 transform">
         <img className="w-8 h-8 rounded-full" src={"/SDM.jpeg"} alt="Bonnie Green image" />
         <div className="flex flex-col gap-1">
           <div className="flex flex-col w-full max-w-[326px] leading-1.5 p-4 border-gray-200 bg-gray-100 shadow-lg rounded-e-xl rounded-es-xl">
@@ -54,7 +54,7 @@ export const CardExperience = () => {
           </div>
         </div>
       </div>
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2.5 transition-all duration-400 hover:scale-104 transform">
         <img className="w-8 h-8 rounded-full" src={"/logo-kominfo.png"} alt="Bonnie Green image" />
         <div className="flex flex-col gap-1">
           <div className="flex flex-col w-full max-w-[326px] leading-1.5 p-4 border-gray-200 bg-gray-100 shadow-lg rounded-e-xl rounded-es-xl">

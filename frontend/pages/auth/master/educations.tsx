@@ -4,16 +4,28 @@ import { DashboardLayout } from "@/components/layouts/DashboardLayout";
 import { TableData } from "@/components/TableData";
 import { ButtonEdit } from "@/components/ButtonEdit";
 import { ButtonDelete } from "@/components/ButtonDelete";
-import { ButtonPagination } from "@/components/ButtonPagination";
+// import { ButtonPagination } from "@/components/ButtonPagination";
 import { ModalPrimary } from "@/components/ModalPrimary";
 import { Loader } from "@/components/Loader";
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent, ChangeEvent } from "react";
 import AxiosInstance from "@/utils/axiosInstance";
 import Swal from "sweetalert2";
+import InputError from "@/components/InputError";
+
+interface EducationForm {
+  uuid: string;
+  tipe: string;
+  nama: string;
+  jurusan: string;
+  masuk: string;
+  lulus: string;
+  nilai_kelulusan: string;
+  gelar: string;
+}
 
 export default function Educations() {
-  const [modalEdu, setModalEdu] = useState(false);
-  const [eduForm, setEduForm] = useState({
+  const [modalEdu, setModalEdu] = useState<boolean>(false);
+  const [eduForm, setEduForm] = useState<EducationForm>({
     uuid: "",
     tipe: "",
     nama: "",
@@ -24,29 +36,33 @@ export default function Educations() {
     gelar: "",
   });
 
-  const [loader, setLoader] = useState(true);
-  const [headerModal, setHeaderModal] = useState("");
+  const [loader, setLoader] = useState<boolean>(true);
+  const [headerModal, setHeaderModal] = useState<string>("");
+  const [data, setData] = useState<any[]>([]);
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string[] }>({});
 
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
+  const fetchData = () => {
+    setLoader(true);
     AxiosInstance.get(`/education`)
       .then((res) => {
-        setData([...res.data.data]);
-        setLoader(false);
+        setData(res.data.data);
       })
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.message,
+          text: error?.response?.data?.message || "Terjadi kesalahan.",
           icon: "error",
         });
-        setLoader(false);
-      });
-  }, [loader]);
+      })
+      .finally(() => setLoader(false));
+  };
 
   useEffect(() => {
-    if (modalEdu == false) {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!modalEdu) {
       setEduForm({
         uuid: "",
         tipe: "",
@@ -57,10 +73,11 @@ export default function Educations() {
         nilai_kelulusan: "",
         gelar: "",
       });
+      setValidationErrors({});
     }
-  }, [modalEdu, setModalEdu]);
+  }, [modalEdu]);
 
-  const handlerSubmit = (e) => {
+  const handlerSubmit = (e: FormEvent) => {
     e.preventDefault();
     Swal.fire({
       title: "Kamu Yakin?",
@@ -78,73 +95,60 @@ export default function Educations() {
             Swal.showLoading();
           },
         });
-        if (eduForm.uuid == "") {
-          AxiosInstance.post(`/education/store`, eduForm)
-            .then((res) => {
-              setLoader(true);
-              setModalEdu(false);
+
+        const action = eduForm.uuid === "" ? AxiosInstance.post(`/education/store`, eduForm) : AxiosInstance.post(`/education/update/${eduForm.uuid}`, eduForm);
+
+        action
+          .then(() => {
+            fetchData();
+            setModalEdu(false);
+            Swal.fire({
+              title: "Success!",
+              text: eduForm.uuid === "" ? "Data Berhasil Ditambahkan." : "Data Berhasil Diupdate.",
+              icon: "success",
+            });
+          })
+          .catch((error) => {
+            const resErr = error.response?.data;
+            if (resErr?.errors) {
+              setValidationErrors(resErr.errors as Record<string, string[]>);
+
+              const flatMessage = (Object.values(resErr.errors) as string[][]).map((err) => err.join(", ")).join("\n");
+
               Swal.fire({
-                title: "Success!",
-                text: "Data Berhasil Ditambahkan.",
-                icon: "success",
-              });
-            })
-            .catch((error) => {
-              Swal.fire({
-                title: "Error!",
-                text: error.response.data.message,
+                title: "Validation Error",
+                text: flatMessage,
                 icon: "error",
               });
-            });
-        } else {
-          AxiosInstance.post(`/education/update/${eduForm.uuid}`, eduForm)
-            .then((res) => {
-              setLoader(true);
-              setModalEdu(false);
-              Swal.fire({
-                title: "Success!",
-                text: "Data Berhasil Diupdate.",
-                icon: "success",
-              });
-            })
-            .catch((error) => {
+            } else {
               Swal.fire({
                 title: "Error!",
-                text: error.response.data.error,
+                text: resErr?.message ?? "Terjadi kesalahan",
                 icon: "error",
               });
-            });
-        }
+            }
+          });
       }
     });
   };
 
-  const editData = (uuid) => {
+  const editData = (uuid: string) => {
     AxiosInstance.get(`/education/show/${uuid}`)
       .then((res) => {
-        setEduForm({
-          uuid: res.data.data.uuid,
-          tipe: res.data.data.tipe,
-          nama: res.data.data.nama,
-          jurusan: res.data.data.jurusan,
-          masuk: res.data.data.masuk,
-          lulus: res.data.data.lulus,
-          nilai_kelulusan: res.data.data.nilai_kelulusan,
-          gelar: res.data.data.gelar,
-        });
+        setEduForm({ ...res.data.data });
         setHeaderModal("Edit Data");
         setModalEdu(true);
       })
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.error,
+          text: error?.response?.data?.error || "Terjadi kesalahan.",
           icon: "error",
         });
       });
   };
 
-  const handleDelete = (uuid) => {
+  const handleDelete = (uuid: string) => {
     Swal.fire({
       title: "Kamu Yakin?",
       text: "Data Akan Dihapus!",
@@ -162,8 +166,8 @@ export default function Educations() {
           },
         });
         AxiosInstance.delete(`/education/delete/${uuid}`)
-          .then((res) => {
-            setLoader(true);
+          .then(() => {
+            fetchData();
             Swal.fire({
               title: "Success!",
               text: "Data Berhasil Dihapus.",
@@ -173,7 +177,7 @@ export default function Educations() {
           .catch((error) => {
             Swal.fire({
               title: "Error!",
-              text: error.response.data.error,
+              text: error?.response?.data?.error || "Terjadi kesalahan.",
               icon: "error",
             });
           });
@@ -181,20 +185,14 @@ export default function Educations() {
     });
   };
 
-  useEffect(() => {
-    if (modalEdu == false) {
-      setEduForm({
-        uuid: "",
-        tipe: "",
-        nama: "",
-        jurusan: "",
-        masuk: "",
-        lulus: "",
-        nilai_kelulusan: "",
-        gelar: "",
-      });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value, files } = e.target as HTMLInputElement;
+    if (files) {
+      setEduForm((prev) => ({ ...prev, [id]: files[0] }));
+    } else {
+      setEduForm((prev) => ({ ...prev, [id]: value }));
     }
-  }, [modalEdu, setModalEdu]);
+  };
 
   return (
     <>
@@ -223,7 +221,7 @@ export default function Educations() {
                         <td className="px-6 py-4 text-black">{all.nama}</td>
                         <td className="px-6 py-4 text-black">{all.tipe}</td>
                         <td className="px-6 py-4 text-black">{all.jurusan}</td>
-                        <td className="px-6 py-4 text-black">{all.masuk.toLocaleString("default", { month: "long" })}</td>
+                        <td className="px-6 py-4 text-black">{new Date(all.masuk).toLocaleDateString("id-ID", { year: "numeric", month: "long" })}</td>
                         <td className="px-6 py-4 text-black">{all.lulus}</td>
                         <td className="px-6 py-4 text-black">{all.nilai_kelulusan}</td>
                         <td className="px-6 py-4 text-black">{all.gelar}</td>
@@ -269,12 +267,7 @@ export default function Educations() {
             <select
               value={eduForm.tipe}
               id="tipe"
-              onChange={(e) =>
-                setEduForm({
-                  ...eduForm,
-                  tipe: e.target.value,
-                })
-              }
+              onChange={(e) => setEduForm({ ...eduForm, tipe: e.target.value })}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               required
             >
@@ -284,6 +277,7 @@ export default function Educations() {
               <option value="Master">Master</option>
               <option value="Doktor">Doktor</option>
             </select>
+            <InputError name="tipe" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="nama" className="block mb-2 text-sm font-medium text-gray-900">
@@ -293,16 +287,12 @@ export default function Educations() {
               type="text"
               id="nama"
               value={eduForm.nama}
-              onChange={(e) =>
-                setEduForm({
-                  ...eduForm,
-                  nama: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Nama..."
               required
             />
+            <InputError name="nama" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="jurusan" className="block mb-2 text-sm font-medium text-gray-900">
@@ -312,16 +302,12 @@ export default function Educations() {
               type="text"
               id="jurusan"
               value={eduForm.jurusan}
-              onChange={(e) =>
-                setEduForm({
-                  ...eduForm,
-                  jurusan: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Jurusan..."
               required
             />
+            <InputError name="jurusan" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="masuk" className="block mb-2 text-sm font-medium text-gray-900">
@@ -331,16 +317,12 @@ export default function Educations() {
               type="date"
               id="masuk"
               value={eduForm.masuk}
-              onChange={(e) =>
-                setEduForm({
-                  ...eduForm,
-                  masuk: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Tahun Masuk..."
               required
             />
+            <InputError name="masuk" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="lulus" className="block mb-2 text-sm font-medium text-gray-900">
@@ -350,32 +332,25 @@ export default function Educations() {
               type="date"
               id="lulus"
               value={eduForm.lulus}
-              onChange={(e) =>
-                setEduForm({
-                  ...eduForm,
-                  lulus: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Tahun Lulus..."
             />
+            <InputError name="lulus" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="nilai_kelulusan" className="block mb-2 text-sm font-medium text-gray-900">
               Nilai Kelulusan
             </label>
             <input
-              type="decimal"
+              type="number"
+              step="any"
               id="nilai_kelulusan"
               value={eduForm.nilai_kelulusan}
-              onChange={(e) =>
-                setEduForm({
-                  ...eduForm,
-                  nilai_kelulusan: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
             />
+            <InputError name="nilai_kelulusan" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="gelar" className="block mb-2 text-sm font-medium text-gray-900">
@@ -385,15 +360,11 @@ export default function Educations() {
               type="text"
               id="gelar"
               value={eduForm.gelar}
-              onChange={(e) =>
-                setEduForm({
-                  ...eduForm,
-                  gelar: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Gelar..."
             />
+            <InputError name="gelar" errors={validationErrors} />
           </div>
         </ModalPrimary>
       </DashboardLayout>

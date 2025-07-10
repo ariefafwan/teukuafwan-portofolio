@@ -30,6 +30,9 @@ class Project extends Model
 
     public function scopeFilter($query, $filters)
     {
+        if (isset($filters['skill'])) {
+            $filters['skill'] = explode(',', $filters['skill']);
+        }
         $query->when($filters['search'] ?? false, function ($q) use ($filters) {
             $search = '%' . $filters['search'] . '%';
             $q->where(function ($q) use ($search) {
@@ -44,12 +47,12 @@ class Project extends Model
             $q->where('status', $filters['status']);
         })->when($filters['tahun'] ?? false, function ($q) use ($filters) {
             $q->where('tahun', $filters['tahun']);
-        })->when($filters['skill_uuid'] ?? false, function ($query) use ($filters) {
+        })->when($filters['skill'] ?? false, function ($query) use ($filters) {
             $query->whereHas('dataSkillProject', function ($k) use ($filters) {
-                if (is_array($filters['skill_uuid'])) {
-                    $k->whereIn('skill_uuid', $filters['skill_uuid']);
+                if (is_array($filters['skill'])) {
+                    $k->whereIn('skill_uuid', $filters['skill']);
                 } else {
-                    $k->where('skill_uuid', $filters['skill_uuid']);
+                    $k->where('skill_uuid', $filters['skill']);
                 }
             });
         })

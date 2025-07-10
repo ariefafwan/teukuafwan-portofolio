@@ -49,6 +49,7 @@ AxiosInstance.interceptors.response.use(
         }
       } catch (refreshError) {
         window.location.href = "/auth";
+        Cookies.remove("token");
         return Promise.reject(refreshError);
       }
     }

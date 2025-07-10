@@ -1,16 +1,34 @@
 "use client";
 
 import AxiosInstance from "@/utils/axiosInstance";
-import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
-import { Loader } from "@/components/Loader";
-import { useRouter } from "next/router";
 import Swal from "sweetalert2";
 import fetchData from "@/lib/fetchData";
 import { ModalPrimary } from "@/components/ModalPrimary";
+import { GetServerSideProps } from "next";
+import InputError from "@/components/InputError";
 
-export const getServerSideProps = async () => {
+interface ProfileData {
+  nama: string;
+  nama_panggilan: string;
+  email: string;
+  moto_profesional: string;
+  deskripsi: string;
+  gambar_profil: any;
+  resume: any;
+  linkedin: string;
+  github: string;
+  instagram: string;
+  kaggle: string;
+}
+
+interface ProfileProps {
+  data: ProfileData;
+  error?: string;
+}
+
+export const getServerSideProps: GetServerSideProps = async () => {
   try {
     const getProfile = await fetchData("/profile");
     return {
@@ -18,7 +36,7 @@ export const getServerSideProps = async () => {
         data: getProfile.data,
       },
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       props: {
         error: error.message,
@@ -27,24 +45,27 @@ export const getServerSideProps = async () => {
   }
 };
 
-export default function Profile({ data }, error) {
+export default function Profile({ data }: ProfileProps) {
   const [modal, setModal] = useState(false);
 
-  const [formProfile, setFormProfile] = useState({
-    nama: data.nama,
-    nama_panggilan: data.nama_panggilan,
-    email: data.email,
-    moto_profesional: data.moto_profesional,
-    deskripsi: data.deskripsi,
+  const [formProfile, setFormProfile] = useState<ProfileData>({
+    ...data,
     resume: null,
     gambar_profil: null,
-    linkedin: data.linkedin,
-    github: data.github,
-    instagram: data.instagram,
-    kaggle: data.kaggle,
   });
 
-  const handlerSubmit = (e) => {
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string[] }>({});
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value, files } = e.target as HTMLInputElement;
+    if (files) {
+      setFormProfile((prev) => ({ ...prev, [id]: files[0] }));
+    } else {
+      setFormProfile((prev) => ({ ...prev, [id]: value }));
+    }
+  };
+
+  const handlerSubmit = (e: FormEvent) => {
     e.preventDefault();
     Swal.fire({
       title: "Kamu Yakin?",
@@ -63,21 +84,34 @@ export default function Profile({ data }, error) {
           },
         });
         AxiosInstance.post(`/profile/update`, formProfile)
-          .then((res) => {
+          .then(() => {
             setModal(false);
             Swal.fire({
               title: "Success!",
-              text: "Data Berhasil Ditambahkan.",
+              text: "Profile Berhasil Diupdate.",
               icon: "success",
             });
             window.location.reload();
           })
           .catch((error) => {
-            Swal.fire({
-              title: "Error!",
-              text: error.response.data.message,
-              icon: "error",
-            });
+            const resErr = error.response?.data;
+            if (resErr?.errors) {
+              setValidationErrors(resErr.errors as Record<string, string[]>);
+
+              const flatMessage = (Object.values(resErr.errors) as string[][]).map((err) => err.join(", ")).join("\n");
+
+              Swal.fire({
+                title: "Validation Error",
+                text: flatMessage,
+                icon: "error",
+              });
+            } else {
+              Swal.fire({
+                title: "Error!",
+                text: resErr?.message ?? "Terjadi kesalahan",
+                icon: "error",
+              });
+            }
           });
       }
     });
@@ -159,7 +193,6 @@ export default function Profile({ data }, error) {
                 <button
                   type="button"
                   onClick={() => setModal(true)}
-                  required
                   className="inline-flex justify-center items-center w-full text-white bg-green-700 hover:bg-green-800 font-medium rounded-md text-sm px-5 py-2.5 text-center"
                 >
                   Atur Profile &nbsp;{" "}
@@ -185,16 +218,12 @@ export default function Profile({ data }, error) {
             type="text"
             id="nama"
             value={formProfile.nama}
-            onChange={(e) =>
-              setFormProfile({
-                ...formProfile,
-                nama: e.target.value,
-              })
-            }
+            onChange={handleChange}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
             placeholder="Nama..."
             required
           />
+          <InputError name="nama" errors={validationErrors} />
         </div>
         <div className="w-full text-black grid grid-cols-2 gap-2">
           <div className="w-full text-black">
@@ -205,16 +234,12 @@ export default function Profile({ data }, error) {
               type="text"
               id="nama_panggilan"
               value={formProfile.nama_panggilan}
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  nama_panggilan: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Nama Panggilan..."
               required
             />
+            <InputError name="nama_panggilan" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">
@@ -224,15 +249,11 @@ export default function Profile({ data }, error) {
               type="email"
               id="email"
               value={formProfile.email}
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  email: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Email..."
             />
+            <InputError name="email" errors={validationErrors} />
           </div>
         </div>
         <div className="w-full text-black grid grid-cols-2 gap-2">
@@ -240,33 +261,15 @@ export default function Profile({ data }, error) {
             <label htmlFor="gambar_profil" className="block mb-2 text-sm font-medium text-gray-900">
               Gambar Profil
             </label>
-            <input
-              type="file"
-              id="gambar_profil"
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  gambar_profil: e.target.files[0],
-                })
-              }
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-            />
+            <input type="file" id="gambar_profil" onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" />
+            <InputError name="gambar_profil" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="resume" className="block mb-2 text-sm font-medium text-gray-900">
               Resume
             </label>
-            <input
-              type="file"
-              id="resume"
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  resume: e.target.files[0],
-                })
-              }
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-            />
+            <input type="file" id="resume" onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" />
+            <InputError name="resume" errors={validationErrors} />
           </div>
         </div>
         <div className="w-full text-black grid grid-cols-2 gap-2">
@@ -278,16 +281,12 @@ export default function Profile({ data }, error) {
               type="text"
               id="linkedin"
               value={formProfile.linkedin}
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  linkedin: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Linkedin..."
               required
             />
+            <InputError name="linkedin" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="kaggle" className="block mb-2 text-sm font-medium text-gray-900">
@@ -297,16 +296,12 @@ export default function Profile({ data }, error) {
               type="text"
               id="kaggle"
               value={formProfile.kaggle}
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  kaggle: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Kaggle..."
               required
             />
+            <InputError name="kaggle" errors={validationErrors} />
           </div>
         </div>
         <div className="w-full text-black grid grid-cols-2 gap-2">
@@ -318,16 +313,12 @@ export default function Profile({ data }, error) {
               type="text"
               id="github"
               value={formProfile.github}
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  github: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Github..."
               required
             />
+            <InputError name="github" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="instagram" className="block mb-2 text-sm font-medium text-gray-900">
@@ -337,16 +328,12 @@ export default function Profile({ data }, error) {
               type="text"
               id="instagram"
               value={formProfile.instagram}
-              onChange={(e) =>
-                setFormProfile({
-                  ...formProfile,
-                  instagram: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Instagram..."
               required
             />
+            <InputError name="instagram" errors={validationErrors} />
           </div>
         </div>
         <div className="w-full text-black">
@@ -354,19 +341,14 @@ export default function Profile({ data }, error) {
             Deskripsi
           </label>
           <textarea
-            type="text"
             id="deskripsi"
             rows={6}
             value={formProfile.deskripsi}
-            onChange={(e) =>
-              setFormProfile({
-                ...formProfile,
-                deskripsi: e.target.value,
-              })
-            }
+            onChange={handleChange}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
             placeholder="Deskripsi..."
           />
+          <InputError name="deskripsi" errors={validationErrors} />
         </div>
       </ModalPrimary>
     </DashboardLayout>

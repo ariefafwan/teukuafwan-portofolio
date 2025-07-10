@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function Navbar({ index, profile }) {
   return (
     <>
@@ -10,7 +8,7 @@ export default function Navbar({ index, profile }) {
               <div className="w-full flex flex-col items-center pb-10 pt-4">
                 <div data-aos="zoom-in">
                   <img
-                    className="w-64 h-64 mb-6 rounded-full bg-none transition-all duration-1000 hover:scale-120 transform"
+                    className="w-64 h-64 mb-6 rounded-full bg-none transition-all duration-800 hover:scale-120 transform"
                     src={process.env.NEXT_PUBLIC_STORAGE_BASE_URL + profile.gambar_profil}
                     alt="Teuku Afwan"
                   />
@@ -21,7 +19,7 @@ export default function Navbar({ index, profile }) {
                 <div className="flex mt-4 md:mt-6 space-x-3">
                   <a
                     href="#contact"
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 transition transform hover:-translate-y-1 duration-300 ease-in-out"
                   >
                     Contact Me &nbsp;
                     <svg className="w-5 h-5 rotate-45" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -32,11 +30,11 @@ export default function Navbar({ index, profile }) {
                       />
                     </svg>
                   </a>
-                  <Link
+                  <a
                     href={process.env.NEXT_PUBLIC_STORAGE_BASE_URL + profile.resume}
                     target="_blank"
                     download
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-gray-500 rounded-lg hover:bg-gray-600 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-gray-500 rounded-lg hover:bg-gray-600 transition transform hover:-translate-y-1 duration-300 ease-in-out"
                   >
                     My Resume &nbsp;
                     <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -47,7 +45,7 @@ export default function Navbar({ index, profile }) {
                         clipRule="evenodd"
                       />
                     </svg>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
@@ -56,18 +54,19 @@ export default function Navbar({ index, profile }) {
       ) : (
         <header className="bg-gray-100">
           <div className="mx-auto flex h-16 max-w-screen-xl items-center gap-4 pt-8 px-4 sm:px-6 lg:px-8">
-            <Link className="block text-teal-600" href="/">
+            <a data-aos="zoom-in" className="block text-teal-600 transition-all duration-500 hover:scale-105 transform" href="/">
               <span className="sr-only">Home</span>
               <img className="w-16 h-16 rounded-full bg-none" src={process.env.NEXT_PUBLIC_STORAGE_BASE_URL + profile.gambar_profil} alt="Teuku Afwan" />
-            </Link>
+            </a>
             <div className="flex flex-1 items-center justify-end md:justify-between">
               <div className="flex items-center gap-4">
                 <div className="sm:flex sm:gap-4">
-                  <Link
+                  <a
+                    data-aos="zoom-in"
                     href={process.env.NEXT_PUBLIC_STORAGE_BASE_URL + profile.resume}
                     download
                     target="_blank"
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-gray-500 rounded-lg hover:bg-gray-600 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-gray-500 rounded-lg hover:bg-gray-600 transition transform hover:-translate-y-1 duration-300 ease-in-out"
                   >
                     My Resume &nbsp;
                     <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -78,7 +77,7 @@ export default function Navbar({ index, profile }) {
                         clipRule="evenodd"
                       />
                     </svg>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>

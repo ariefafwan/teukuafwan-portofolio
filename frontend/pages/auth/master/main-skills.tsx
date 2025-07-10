@@ -6,50 +6,65 @@ import { ButtonEdit } from "@/components/ButtonEdit";
 import { ButtonDelete } from "@/components/ButtonDelete";
 import { ModalPrimary } from "@/components/ModalPrimary";
 import { Loader } from "@/components/Loader";
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent, ChangeEvent } from "react";
 import AxiosInstance from "@/utils/axiosInstance";
 import Swal from "sweetalert2";
+import InputError from "@/components/InputError";
 
-export default function MainSKills() {
-  const [modal, setModal] = useState(false);
-  const [mainSkillForm, setMainSkillForm] = useState({
+interface MainSkillForm {
+  uuid: string;
+  gambar: any;
+  nama: string;
+  deskripsi: string;
+}
+
+export default function MainSkills() {
+  const [modal, setModal] = useState<boolean>(false);
+  const [mainSkillForm, setMainSkillForm] = useState<MainSkillForm>({
     uuid: "",
-    gambar: "",
+    gambar: null,
     nama: "",
     deskripsi: "",
   });
 
-  const [loader, setLoader] = useState(true);
-  const [headerModal, setHeaderModal] = useState("");
+  const [loader, setLoader] = useState<boolean>(true);
+  const [headerModal, setHeaderModal] = useState<string>("");
+  const [data, setData] = useState<any[]>([]);
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string[] }>({});
 
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
+  const fetchData = () => {
+    setLoader(true);
     AxiosInstance.get(`/main-skill`)
       .then((res) => {
-        setData([...res.data.data]);
-        setLoader(false);
+        setData(res.data.data);
       })
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.message,
+          text: error?.response?.data?.message || "Terjadi kesalahan.",
           icon: "error",
         });
-        setLoader(false);
-      });
-  }, [loader]);
+      })
+      .finally(() => setLoader(false));
+  };
 
   useEffect(() => {
-    if (modal == false) {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!modal) {
       setMainSkillForm({
         uuid: "",
+        gambar: null,
         nama: "",
+        deskripsi: "",
       });
+      setValidationErrors({});
     }
-  }, [modal, setModal]);
+  }, [modal]);
 
-  const handlerSubmit = (e) => {
+  const handlerSubmit = (e: FormEvent) => {
     e.preventDefault();
     Swal.fire({
       title: "Kamu Yakin?",
@@ -67,54 +82,51 @@ export default function MainSKills() {
             Swal.showLoading();
           },
         });
-        if (mainSkillForm.uuid == "") {
-          AxiosInstance.post(`/main-skill/store`, mainSkillForm)
-            .then((res) => {
-              setLoader(true);
-              setModal(false);
+
+        const action = mainSkillForm.uuid === "" ? AxiosInstance.post(`/main-skill/store`, mainSkillForm) : AxiosInstance.post(`/main-skill/update/${mainSkillForm.uuid}`, mainSkillForm);
+
+        action
+          .then(() => {
+            fetchData();
+            setModal(false);
+            Swal.fire({
+              title: "Success!",
+              text: mainSkillForm.uuid === "" ? "Data Berhasil Ditambahkan." : "Data Berhasil Diupdate.",
+              icon: "success",
+            });
+          })
+          .catch((error) => {
+            const resErr = error.response?.data;
+            if (resErr?.errors) {
+              setValidationErrors(resErr.errors as Record<string, string[]>);
+
+              const flatMessage = (Object.values(resErr.errors) as string[][]).map((err) => err.join(", ")).join("\n");
+
               Swal.fire({
-                title: "Success!",
-                text: "Data Berhasil Ditambahkan.",
-                icon: "success",
-              });
-            })
-            .catch((error) => {
-              Swal.fire({
-                title: "Error!",
-                text: error.response.data.message,
+                title: "Validation Error",
+                text: flatMessage,
                 icon: "error",
               });
-            });
-        } else {
-          AxiosInstance.post(`/main-skill/update/${mainSkillForm.uuid}`, mainSkillForm)
-            .then((res) => {
-              setLoader(true);
-              setModal(false);
-              Swal.fire({
-                title: "Success!",
-                text: "Data Berhasil Diupdate.",
-                icon: "success",
-              });
-            })
-            .catch((error) => {
+            } else {
               Swal.fire({
                 title: "Error!",
-                text: error.response.data.error,
+                text: resErr?.message ?? "Terjadi kesalahan",
                 icon: "error",
               });
-            });
-        }
+            }
+          });
       }
     });
   };
 
-  const editData = (uuid) => {
+  const editData = (uuid: string) => {
     AxiosInstance.get(`/main-skill/show/${uuid}`)
       .then((res) => {
         setMainSkillForm({
           uuid: res.data.data.uuid,
           nama: res.data.data.nama,
           deskripsi: res.data.data.deskripsi,
+          gambar: res.data.data.gambar,
         });
         setHeaderModal("Edit Data");
         setModal(true);
@@ -122,13 +134,13 @@ export default function MainSKills() {
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.error,
+          text: error.response?.data?.error || "Terjadi kesalahan.",
           icon: "error",
         });
       });
   };
 
-  const handleDelete = (uuid) => {
+  const handleDelete = (uuid: string) => {
     Swal.fire({
       title: "Kamu Yakin?",
       text: "Data Akan Dihapus!",
@@ -146,8 +158,8 @@ export default function MainSKills() {
           },
         });
         AxiosInstance.delete(`/main-skill/delete/${uuid}`)
-          .then((res) => {
-            setLoader(true);
+          .then(() => {
+            fetchData();
             Swal.fire({
               title: "Success!",
               text: "Data Berhasil Dihapus.",
@@ -157,7 +169,7 @@ export default function MainSKills() {
           .catch((error) => {
             Swal.fire({
               title: "Error!",
-              text: error.response.data.error,
+              text: error.response?.data?.error || "Terjadi kesalahan.",
               icon: "error",
             });
           });
@@ -165,16 +177,14 @@ export default function MainSKills() {
     });
   };
 
-  useEffect(() => {
-    if (modal == false) {
-      setMainSkillForm({
-        uuid: "",
-        gambar: "",
-        nama: "",
-        deskripsi: "",
-      });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value, files } = e.target as HTMLInputElement;
+    if (files) {
+      setMainSkillForm((prev) => ({ ...prev, [id]: files[0] }));
+    } else {
+      setMainSkillForm((prev) => ({ ...prev, [id]: value }));
     }
-  }, [modal, setModal]);
+  };
 
   return (
     <>
@@ -193,32 +203,30 @@ export default function MainSKills() {
               }}
             >
               {data.length > 0 ? (
-                loader == false ? (
-                  data.map((all, i) => {
-                    return (
-                      <tr key={i} className="bg-white border-b">
-                        <th scope="row" className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">
-                          {i + 1}
-                        </th>
-                        <td className="px-6 py-4 text-black">
-                          <img class="w-10 h-10 rounded-full" src={process.env.NEXT_PUBLIC_STORAGE_BASE_URL + all.gambar} alt="Rounded avatar"></img>
-                        </td>
-                        <td className="px-6 py-4 text-black">{all.nama}</td>
-                        <td className="px-6 py-4 text-black">{all.deskripsi}</td>
-                        <td className="px-6 py-4 text-black">
-                          <div>
-                            <ButtonEdit click={() => editData(all.uuid)}></ButtonEdit>
-                            <ButtonDelete click={() => handleDelete(all.uuid)}></ButtonDelete>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
+                !loader ? (
+                  data.map((all, i) => (
+                    <tr key={i} className="bg-white border-b">
+                      <th scope="row" className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">
+                        {i + 1}
+                      </th>
+                      <td className="px-6 py-4 text-black">
+                        <img className="w-10 h-10 rounded-full" src={process.env.NEXT_PUBLIC_STORAGE_BASE_URL + all.gambar} alt="Rounded avatar" />
+                      </td>
+                      <td className="px-6 py-4 text-black">{all.nama}</td>
+                      <td className="px-6 py-4 text-black">{all.deskripsi}</td>
+                      <td className="px-6 py-4 text-black">
+                        <div>
+                          <ButtonEdit click={() => editData(all.uuid)} />
+                          <ButtonDelete click={() => handleDelete(all.uuid)} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
                   <tr className="bg-white border-b">
                     <td colSpan={9} className="text-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                       <div className="flex w-full justify-center">
-                        <Loader></Loader>
+                        <Loader />
                       </div>
                     </td>
                   </tr>
@@ -226,9 +234,9 @@ export default function MainSKills() {
               ) : (
                 <tr className="bg-white border-b">
                   <td colSpan={9} className="text-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                    {loader == true ? (
+                    {loader ? (
                       <div className="flex w-full justify-center">
-                        <Loader></Loader>
+                        <Loader />
                       </div>
                     ) : (
                       "Belum Ada Data"
@@ -248,51 +256,33 @@ export default function MainSKills() {
               type="text"
               id="nama"
               value={mainSkillForm.nama}
-              onChange={(e) =>
-                setMainSkillForm({
-                  ...mainSkillForm,
-                  nama: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               placeholder="Nama..."
               required
             />
+            <InputError name="nama" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="gambar" className="block mb-2 text-sm font-medium text-gray-900">
               Gambar
             </label>
-            <input
-              type="file"
-              id="gambar"
-              onChange={(e) =>
-                setMainSkillForm({
-                  ...mainSkillForm,
-                  gambar: e.target.files[0],
-                })
-              }
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-            />
+            <input type="file" id="gambar" onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" />
+            <InputError name="gambar" errors={validationErrors} />
           </div>
           <div className="w-full text-black">
             <label htmlFor="deskripsi" className="block mb-2 text-sm font-medium text-gray-900">
               Deskripsi
             </label>
             <textarea
-              type="text"
               id="deskripsi"
               value={mainSkillForm.deskripsi}
-              onChange={(e) =>
-                setMainSkillForm({
-                  ...mainSkillForm,
-                  deskripsi: e.target.value,
-                })
-              }
+              onChange={handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
               rows={4}
               required
             />
+            <InputError name="deskripsi" errors={validationErrors} />
           </div>
         </ModalPrimary>
       </DashboardLayout>

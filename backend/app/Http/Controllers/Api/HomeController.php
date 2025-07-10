@@ -61,8 +61,13 @@ class HomeController extends ApiController
 
     public function show_project($slug)
     {
+        $project = $this->project_repo->find_by_slug($slug)->load('dataSkill', 'dataGambar');
         $data = [
-            'project' => $this->project_repo->find_by_slug($slug)->load('skills'),
+            'project' => $project,
+            'other_projects' => $this->project_repo->where('slug', '!=', $slug)
+                ->whereHas('dataSkill', function ($q) use ($project) {
+                    $q->whereIn('skill_uuid', $project->dataSkill->pluck('uuid'));
+                })->get(),
             'profile' => $this->profile_repo->first(),
         ];
         return $this->successResponse($data);

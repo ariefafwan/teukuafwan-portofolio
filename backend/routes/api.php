@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/home', [HomeController::class, 'index']);
 Route::get('/profile', [HomeController::class, 'profile']);
 Route::get('/projects', [HomeController::class, 'projects']);
-Route::get('/projects/{uuid}', [HomeController::class, 'show_project']);
+Route::get('/projects/{slug}', [HomeController::class, 'show_project']);
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');

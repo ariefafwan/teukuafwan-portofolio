@@ -17,7 +17,7 @@ import { ChangeEvent, FormEvent } from "react";
 interface ProjectForm {
   uuid: string;
   judul: string;
-  gambar: File[];
+  gambar: any[];
   skill_uuid: any[];
   status: string;
   tahun: string;
@@ -293,8 +293,6 @@ export default function MasterProjects() {
     });
   };
 
-  console.log(allData.data);
-
   return (
     <>
       <DashboardLayout title="Master Projects">
@@ -439,7 +437,7 @@ export default function MasterProjects() {
               type="text"
               id="judul"
               value={projectForm.judul}
-              onChange={(e) =>
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setProjectForm({
                   ...projectForm,
                   judul: e.target.value,
@@ -460,7 +458,7 @@ export default function MasterProjects() {
               onChange={(value) =>
                 setProjectForm({
                   ...projectForm,
-                  skill_uuid: value,
+                  skill_uuid: value as any[],
                 })
               }
               value={projectForm.skill_uuid}
@@ -495,7 +493,7 @@ export default function MasterProjects() {
                 type="text"
                 id="link"
                 value={projectForm.link}
-                onChange={(e) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setProjectForm({
                     ...projectForm,
                     link: e.target.value,

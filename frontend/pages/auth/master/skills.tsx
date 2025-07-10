@@ -6,49 +6,61 @@ import { ButtonEdit } from "@/components/ButtonEdit";
 import { ButtonDelete } from "@/components/ButtonDelete";
 import { ModalPrimary } from "@/components/ModalPrimary";
 import { Loader } from "@/components/Loader";
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import AxiosInstance from "@/utils/axiosInstance";
 import Swal from "sweetalert2";
+import InputError from "@/components/InputError";
+
+interface Skill {
+  uuid: string;
+  nama: string;
+}
 
 export default function Skills() {
-  const [modal, setModal] = useState(false);
-  const [skillForm, setSkillForm] = useState({
+  const [modal, setModal] = useState<boolean>(false);
+  const [skillForm, setSkillForm] = useState<Skill>({
     uuid: "",
     nama: "",
   });
 
-  const [loader, setLoader] = useState(true);
-  const [headerModal, setHeaderModal] = useState("");
+  const [loader, setLoader] = useState<boolean>(true);
+  const [headerModal, setHeaderModal] = useState<string>("");
+  const [data, setData] = useState<any[]>([]);
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string[] }>({});
 
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
+  const fetchData = () => {
+    setLoader(true);
     AxiosInstance.get(`/skill`)
       .then((res) => {
-        setData([...res.data.data]);
-        setLoader(false);
+        setData(res.data.data);
       })
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.message,
+          text: error?.response?.data?.message || "Terjadi kesalahan.",
           icon: "error",
         });
-        setLoader(false);
-      });
-  }, [loader]);
+      })
+      .finally(() => setLoader(false));
+  };
 
   useEffect(() => {
-    if (modal == false) {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!modal) {
       setSkillForm({
         uuid: "",
         nama: "",
       });
+      setValidationErrors({});
     }
-  }, [modal, setModal]);
+  }, [modal]);
 
-  const handlerSubmit = (e) => {
+  const handlerSubmit = (e: FormEvent) => {
     e.preventDefault();
+
     Swal.fire({
       title: "Kamu Yakin?",
       text: "Data Akan Disimpan, Pastikan Data Sudah Benar",
@@ -65,49 +77,45 @@ export default function Skills() {
             Swal.showLoading();
           },
         });
-        if (skillForm.uuid == "") {
-          AxiosInstance.post(`/skill/store`, skillForm)
-            .then((res) => {
-              setLoader(true);
-              setModal(false);
+
+        const action = skillForm.uuid === "" ? AxiosInstance.post(`/skill/store`, skillForm) : AxiosInstance.post(`/skill/update/${skillForm.uuid}`, skillForm);
+
+        action
+          .then(() => {
+            fetchData();
+            setModal(false);
+            Swal.fire({
+              title: "Success!",
+              text: skillForm.uuid === "" ? "Data Berhasil Ditambahkan." : "Data Berhasil Diupdate.",
+              icon: "success",
+            });
+          })
+          .catch((error) => {
+            const resErr = error.response?.data;
+            if (resErr?.errors) {
+              setValidationErrors(resErr.errors as Record<string, string[]>);
+
+              const flatMessage = (Object.values(resErr.errors) as string[][]).map((err) => err.join(", ")).join("\n");
+
               Swal.fire({
-                title: "Success!",
-                text: "Data Berhasil Ditambahkan.",
-                icon: "success",
-              });
-            })
-            .catch((error) => {
-              Swal.fire({
-                title: "Error!",
-                text: error.response.data.message,
+                title: "Validation Error",
+                text: flatMessage,
                 icon: "error",
               });
-            });
-        } else {
-          AxiosInstance.post(`/skill/update/${skillForm.uuid}`, skillForm)
-            .then((res) => {
-              setLoader(true);
-              setModal(false);
-              Swal.fire({
-                title: "Success!",
-                text: "Data Berhasil Diupdate.",
-                icon: "success",
-              });
-            })
-            .catch((error) => {
+            } else {
               Swal.fire({
                 title: "Error!",
-                text: error.response.data.error,
+                text: resErr?.message ?? "Terjadi kesalahan",
                 icon: "error",
               });
-            });
-        }
+            }
+          });
       }
     });
   };
 
-  const editData = (uuid) => {
-    AxiosInstance.get(`/skill/show/${uuid}`)
+  const editData = (uuid: string) => {
+    AxiosInstance.get<{ data: Skill }>(`/skill/show/${uuid}`)
       .then((res) => {
         setSkillForm({
           uuid: res.data.data.uuid,
@@ -119,13 +127,13 @@ export default function Skills() {
       .catch((error) => {
         Swal.fire({
           title: "Error!",
-          text: error.response.data.error,
+          text: error?.response?.data?.error || "Terjadi kesalahan.",
           icon: "error",
         });
       });
   };
 
-  const handleDelete = (uuid) => {
+  const handleDelete = (uuid: string) => {
     Swal.fire({
       title: "Kamu Yakin?",
       text: "Data Akan Dihapus!",
@@ -143,8 +151,8 @@ export default function Skills() {
           },
         });
         AxiosInstance.delete(`/skill/delete/${uuid}`)
-          .then((res) => {
-            setLoader(true);
+          .then(() => {
+            fetchData();
             Swal.fire({
               title: "Success!",
               text: "Data Berhasil Dihapus.",
@@ -154,22 +162,13 @@ export default function Skills() {
           .catch((error) => {
             Swal.fire({
               title: "Error!",
-              text: error.response.data.error,
+              text: error?.response?.data?.error || "Terjadi kesalahan.",
               icon: "error",
             });
           });
       }
     });
   };
-
-  useEffect(() => {
-    if (modal == false) {
-      setSkillForm({
-        uuid: "",
-        nama: "",
-      });
-    }
-  }, [modal, setModal]);
 
   return (
     <>
@@ -188,28 +187,26 @@ export default function Skills() {
               }}
             >
               {data.length > 0 ? (
-                loader == false ? (
-                  data.map((all, i) => {
-                    return (
-                      <tr key={i} className="bg-white border-b">
-                        <th scope="row" className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">
-                          {i + 1}
-                        </th>
-                        <td className="px-6 py-4 text-black">{all.nama}</td>
-                        <td className="px-6 py-4 text-black">
-                          <div>
-                            <ButtonEdit click={() => editData(all.uuid)}></ButtonEdit>
-                            <ButtonDelete click={() => handleDelete(all.uuid)}></ButtonDelete>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
+                !loader ? (
+                  data.map((item, i) => (
+                    <tr key={item.uuid} className="bg-white border-b">
+                      <th scope="row" className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">
+                        {i + 1}
+                      </th>
+                      <td className="px-6 py-4 text-black">{item.nama}</td>
+                      <td className="px-6 py-4 text-black">
+                        <div>
+                          <ButtonEdit click={() => editData(item.uuid)} />
+                          <ButtonDelete click={() => handleDelete(item.uuid)} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
                   <tr className="bg-white border-b">
                     <td colSpan={9} className="text-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                       <div className="flex w-full justify-center">
-                        <Loader></Loader>
+                        <Loader />
                       </div>
                     </td>
                   </tr>
@@ -217,9 +214,9 @@ export default function Skills() {
               ) : (
                 <tr className="bg-white border-b">
                   <td colSpan={9} className="text-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                    {loader == true ? (
+                    {loader ? (
                       <div className="flex w-full justify-center">
-                        <Loader></Loader>
+                        <Loader />
                       </div>
                     ) : (
                       "Belum Ada Data"
@@ -249,6 +246,7 @@ export default function Skills() {
               placeholder="Nama..."
               required
             />
+            <InputError name="nama" errors={validationErrors} />
           </div>
         </ModalPrimary>
       </DashboardLayout>

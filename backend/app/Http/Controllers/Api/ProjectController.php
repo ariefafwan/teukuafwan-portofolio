@@ -70,7 +70,7 @@ class ProjectController extends ApiController
 
     public function show($slug)
     {
-        $data = $this->project_repo->find_by_slug($slug);
+        $data = $this->project_repo->find_by_slug($slug)->load('dataSkill', 'dataGambar');
         return $this
             ->successResponse($data);
     }
