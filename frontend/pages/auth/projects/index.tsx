@@ -359,7 +359,7 @@ export default function MasterProjects() {
                         <td className="px-6 py-4 text-black">
                           <img className="w-10 h-10 rounded-full" src={`${process.env.NEXT_PUBLIC_STORAGE_BASE_URL}${all.data_gambar?.[0].gambar}`} alt="Project thumbnail" />
                         </td>
-                        <td className="px-6 py-4 text-black">{all.data_skill.map((skill) => skill.nama).join(", ")}</td>
+                        <td className="px-6 py-4 text-black">{all.data_skill.map((skill: any) => skill.nama).join(", ")}</td>
                         <td className="px-6 py-4 text-black">{all.tahun}</td>
                         <td className="px-6 py-4 text-black">{all.status}</td>
                         <td className="px-6 py-4 text-black">

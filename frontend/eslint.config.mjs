@@ -15,6 +15,8 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "jsx-a11y/anchor-is-valid": "off",
+      "@next/next/no-img-element": "off",
+      "@next/next/no-html-link-for-pages": "off",
     },
   },
 ];
