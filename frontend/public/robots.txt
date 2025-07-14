@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://teukuafwan.my.id
+
+# Sitemaps
+Sitemap: https://teukuafwan.my.id/sitemap.xml

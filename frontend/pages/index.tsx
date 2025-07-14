@@ -88,7 +88,6 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
           <h2 className="text-xl max-lg:text-center font-bold text-gray-500 sm:text-3xl">Education</h2>
           <p className="my-4 max-lg:text-sm max-lg:text-center max-lg:max-w-full text-gray-500">My academic journey and continuing education</p>
         </header>
-
         <ol className="relative border-s border-blue-400">
           {educations.map((education: any) => (
             <li key={education.uuid} className="mb-10 ms-4">

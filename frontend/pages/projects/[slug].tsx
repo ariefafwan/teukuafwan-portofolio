@@ -75,7 +75,7 @@ export default function ProjectDetail({ data }: { data: any }) {
                     aria-label="Project Gallery"
                     className="my-6"
                   >
-                    {ProjectData.data_gambar.map((item: string, i: number) => (
+                    {ProjectData.data_gambar.map((item: any, i: number) => (
                       <SplideSlide key={i}>
                         <img src={process.env.NEXT_PUBLIC_STORAGE_BASE_URL + item.gambar} alt={`Gallery ${i}`} className="rounded-lg object-cover w-full h-64" />
                       </SplideSlide>
