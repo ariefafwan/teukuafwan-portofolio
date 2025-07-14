@@ -1,0 +1,115 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "dynamicRoutes": [
+    {
+      "page": "/projects/[slug]",
+      "regex": "^/projects/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/projects/(?<nxtPslug>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/auth/master/educations",
+      "regex": "^/auth/master/educations(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/master/educations(?:/)?$"
+    },
+    {
+      "page": "/auth/master/main-skills",
+      "regex": "^/auth/master/main\\-skills(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/master/main\\-skills(?:/)?$"
+    },
+    {
+      "page": "/auth/master/skills",
+      "regex": "^/auth/master/skills(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/master/skills(?:/)?$"
+    },
+    {
+      "page": "/auth/profile",
+      "regex": "^/auth/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/profile(?:/)?$"
+    },
+    {
+      "page": "/auth/projects",
+      "regex": "^/auth/projects(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/projects(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/projects",
+      "regex": "^/projects(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/projects(?:/)?$"
+    }
+  ],
+  "dataRoutes": [
+    {
+      "page": "/",
+      "dataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/index\\.json$"
+    },
+    {
+      "page": "/auth/profile",
+      "dataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/auth/profile\\.json$"
+    },
+    {
+      "page": "/projects",
+      "dataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/projects\\.json$"
+    },
+    {
+      "page": "/projects/[slug]",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "dataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/projects/([^/]+?)\\.json$",
+      "namedDataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/projects/(?<nxtPslug>[^/]+?)\\.json$"
+    }
+  ],
+  "rsc": {
+    "header": "RSC",
+    "varyHeader": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Router-Segment-Prefetch",
+    "prefetchHeader": "Next-Router-Prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "Next-Router-Segment-Prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  },
+  "rewrites": []
+}

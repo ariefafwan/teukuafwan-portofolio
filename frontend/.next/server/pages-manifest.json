@@ -1,0 +1,16 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/api/hello": "pages/api/hello.js",
+  "/auth/master/educations": "pages/auth/master/educations.html",
+  "/auth/master/main-skills": "pages/auth/master/main-skills.html",
+  "/auth/master/skills": "pages/auth/master/skills.html",
+  "/auth/projects": "pages/auth/projects.html",
+  "/login": "pages/login.html",
+  "/projects/[slug]": "pages/projects/[slug].js",
+  "/auth/profile": "pages/auth/profile.js",
+  "/": "pages/index.js",
+  "/projects": "pages/projects.js",
+  "/404": "pages/404.html"
+}
