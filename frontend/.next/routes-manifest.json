@@ -88,23 +88,23 @@
   "dataRoutes": [
     {
       "page": "/",
-      "dataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/index\\.json$"
+      "dataRouteRegex": "^/_next/data/vpVQ4uD7jACV4vayBYyvL/index\\.json$"
     },
     {
       "page": "/auth/profile",
-      "dataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/auth/profile\\.json$"
+      "dataRouteRegex": "^/_next/data/vpVQ4uD7jACV4vayBYyvL/auth/profile\\.json$"
     },
     {
       "page": "/projects",
-      "dataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/projects\\.json$"
+      "dataRouteRegex": "^/_next/data/vpVQ4uD7jACV4vayBYyvL/projects\\.json$"
     },
     {
       "page": "/projects/[slug]",
       "routeKeys": {
         "nxtPslug": "nxtPslug"
       },
-      "dataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/projects/([^/]+?)\\.json$",
-      "namedDataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/projects/(?<nxtPslug>[^/]+?)\\.json$"
+      "dataRouteRegex": "^/_next/data/vpVQ4uD7jACV4vayBYyvL/projects/([^/]+?)\\.json$",
+      "namedDataRouteRegex": "^/_next/data/vpVQ4uD7jACV4vayBYyvL/projects/(?<nxtPslug>[^/]+?)\\.json$"
     }
   ],
   "rsc": {

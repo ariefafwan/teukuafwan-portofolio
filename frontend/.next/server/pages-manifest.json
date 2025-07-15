@@ -9,9 +9,9 @@
   "/auth/master/skills": "pages/auth/master/skills.html",
   "/auth/projects": "pages/auth/projects.html",
   "/login": "pages/login.html",
+  "/_error": "pages/_error.js",
+  "/projects": "pages/projects.js",
   "/projects/[slug]": "pages/projects/[slug].js",
   "/auth/profile": "pages/auth/profile.js",
-  "/": "pages/index.js",
-  "/_error": "pages/_error.js",
-  "/projects": "pages/projects.js"
+  "/": "pages/index.js"
 }
