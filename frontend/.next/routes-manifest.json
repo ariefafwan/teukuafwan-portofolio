@@ -31,6 +31,18 @@
       "namedRegex": "^/(?:/)?$"
     },
     {
+      "page": "/404",
+      "regex": "^/404(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/404(?:/)?$"
+    },
+    {
+      "page": "/500",
+      "regex": "^/500(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/500(?:/)?$"
+    },
+    {
       "page": "/auth/master/educations",
       "regex": "^/auth/master/educations(?:/)?$",
       "routeKeys": {},
@@ -76,23 +88,23 @@
   "dataRoutes": [
     {
       "page": "/",
-      "dataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/index\\.json$"
+      "dataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/index\\.json$"
     },
     {
       "page": "/auth/profile",
-      "dataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/auth/profile\\.json$"
+      "dataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/auth/profile\\.json$"
     },
     {
       "page": "/projects",
-      "dataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/projects\\.json$"
+      "dataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/projects\\.json$"
     },
     {
       "page": "/projects/[slug]",
       "routeKeys": {
         "nxtPslug": "nxtPslug"
       },
-      "dataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/projects/([^/]+?)\\.json$",
-      "namedDataRouteRegex": "^/_next/data/MgAeilw5KHWenQQN8ElWh/projects/(?<nxtPslug>[^/]+?)\\.json$"
+      "dataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/projects/([^/]+?)\\.json$",
+      "namedDataRouteRegex": "^/_next/data/a3_oJq7ZNVnPOtAG62Qrv/projects/(?<nxtPslug>[^/]+?)\\.json$"
     }
   ],
   "rsc": {
