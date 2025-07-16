@@ -1,13 +1,21 @@
 import fetchData from "@/lib/fetchData";
 import { CardSkills } from "../components/CardSkills";
 import { CardExperience } from "../components/CardExperience";
-import { CardProjects } from "../components/CardProjects";
 import { DefaultLayout } from "../components/layouts/DefaultLayout";
 // import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { ChangeEvent, FormEvent } from "react";
+import dynamic from "next/dynamic";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
+import React from "react";
+
+const CardProjects = dynamic(() => import("../components/CardProjects").then((mod) => ({ default: mod.CardProjects })), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-48 rounded-lg"></div>,
+});
+
+const MemoizedCardSkills = React.memo(CardSkills);
+const MemoizedCardProjects = React.memo(CardProjects);
 
 export const getServerSideProps = async (context: any) => {
   const { skill = "", search = "", order = "" } = context.query;
@@ -39,38 +47,110 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
   const { profile, educations, skills, main_skills, projects } = data;
   const projectData: any[] = projects.data;
 
+  // const router = useRouter();
   const [localSkill, setLocalSkill] = useState<string[]>(filterSkill || []);
   const [localSearch, setLocalSearch] = useState<string>(filterSearch || "");
   const [localOrder, setLocalOrder] = useState<string>(filterOrder || "");
 
-  const formatMonthYear = (dateString: string): string => {
+  const formatMonthYear = useCallback((dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleString("en-US", {
       month: "long",
       year: "numeric",
     });
-  };
+  }, []);
 
-  const aturFilterSkill = (e: ChangeEvent<HTMLInputElement>, uuid: string) => {
-    if (e.target.checked) {
-      setLocalSkill([...localSkill, uuid]);
-    } else {
-      setLocalSkill(localSkill.filter((id) => id !== uuid));
-    }
-  };
+  const aturFilterSkill = useCallback((e: ChangeEvent<HTMLInputElement>, uuid: string) => {
+    setLocalSkill((prev) => (e.target.checked ? [...prev, uuid] : prev.filter((id) => id !== uuid)));
+  }, []);
 
-  const handleFilter = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (localSearch) params.append("search", localSearch);
-    if (localOrder) params.append("order", localOrder);
-    if (localSkill.length > 0) params.append("skill", localSkill.join(","));
-    window.location.href = "/?" + params.toString();
-  };
+  // const handleFilter = (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   const params = new URLSearchParams();
+  //   if (localSearch) params.append("search", localSearch);
+  //   if (localOrder) params.append("order", localOrder);
+  //   if (localSkill.length > 0) params.append("skill", localSkill.join(","));
+  //   window.location.href = "/?" + params.toString();
+  // };
 
-  const resetFilter = () => {
+  // const resetFilter = () => {
+  //   window.location.href = "/";
+  // };
+
+  const handleFilter = useCallback(
+    (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const params = new URLSearchParams();
+      if (localSearch) params.append("search", localSearch);
+      if (localOrder) params.append("order", localOrder);
+      if (localSkill.length > 0) params.append("skill", localSkill.join(","));
+
+      window.location.href = "/?" + params.toString();
+    },
+    [localSearch, localOrder, localSkill]
+  );
+
+  const resetFilter = useCallback(() => {
+    setLocalSkill([]);
+    setLocalSearch("");
+    setLocalOrder("");
     window.location.href = "/";
-  };
+  }, []);
+
+  const renderEducations = useMemo(
+    () => (
+      <ol className="relative border-s border-blue-400">
+        {educations.map((education: any) => (
+          <li key={education.uuid} className="mb-10 ms-4">
+            <div className="absolute w-3.5 h-3.5 bg-blue-600 rounded-full mt-1.5 -start-1.5" />
+            <time className="mb-1 text-sm font-normal leading-none text-gray-400">
+              {formatMonthYear(education.masuk)} {education.lulus ? `- ${formatMonthYear(education.lulus)}` : ""}
+            </time>
+            <h3 className="text-lg font-semibold text-gray-900">{education.nama}</h3>
+            <p className="text-base font-normal text-gray-500">
+              {education.gelar} - Major in {education.jurusan} {education.nilai_kelulusan ? `- GPA: ${education.nilai_kelulusan}` : ""}
+            </p>
+          </li>
+        ))}
+      </ol>
+    ),
+    [educations, formatMonthYear]
+  );
+
+  const renderSkillFilters = useMemo(
+    () => (
+      <div className="flex flex-col items-start gap-3">
+        {skills.map((skill: any) => (
+          <label key={skill.uuid} htmlFor={skill.uuid} className="inline-flex items-center gap-3">
+            <input
+              type="checkbox"
+              id={skill.uuid}
+              onChange={(e) => aturFilterSkill(e, skill.uuid)}
+              checked={localSkill.includes(skill.uuid)}
+              className="size-5 rounded border-gray-300 hover:cursor-pointer"
+            />
+            <span className="text-sm font-medium text-gray-700">{skill.nama}</span>
+          </label>
+        ))}
+      </div>
+    ),
+    [skills, localSkill, aturFilterSkill]
+  );
+
+  const splideOptions = useMemo(
+    () => ({
+      type: "loop" as const,
+      perPage: 3,
+      gap: "1rem",
+      breakpoints: {
+        1024: { perPage: 2 },
+        640: { perPage: 1 },
+      },
+      pagination: false,
+      arrows: true,
+    }),
+    []
+  );
 
   return (
     <DefaultLayout profile={profile} title="Home" index={true}>
@@ -78,7 +158,7 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
         <div className="w-full mx-auto">
           <div className="grid gap-4 sm:grid-cols-2 place-content-center lg:grid-cols-3">
             {main_skills.map((main_skill: any) => (
-              <CardSkills key={main_skill.uuid} data={main_skill} />
+              <MemoizedCardSkills key={main_skill.uuid} data={main_skill} />
             ))}
           </div>
         </div>
@@ -88,20 +168,7 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
           <h2 className="text-xl max-lg:text-center font-bold text-gray-500 sm:text-3xl">Education</h2>
           <p className="my-4 max-lg:text-sm max-lg:text-center max-lg:max-w-full text-gray-500">My academic journey and continuing education</p>
         </header>
-        <ol className="relative border-s border-blue-400">
-          {educations.map((education: any) => (
-            <li key={education.uuid} className="mb-10 ms-4">
-              <div className="absolute w-3.5 h-3.5 bg-blue-600 rounded-full mt-1.5 -start-1.5" />
-              <time className="mb-1 text-sm font-normal leading-none text-gray-400">
-                {formatMonthYear(education.masuk)} {education.lulus ? `- ${formatMonthYear(education.lulus)}` : ""}
-              </time>
-              <h3 className="text-lg font-semibold text-gray-900">{education.nama}</h3>
-              <p className="text-base font-normal text-gray-500">
-                {education.gelar} - Major in {education.jurusan} {education.nilai_kelulusan ? `- GPA: ${education.nilai_kelulusan}` : ""}
-              </p>
-            </li>
-          ))}
-        </ol>
+        <ol className="relative border-s border-blue-400">{renderEducations}</ol>
       </div>
       <div data-aos="fade-up" className="mx-auto my-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8 ">
         <header>
@@ -143,24 +210,7 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
                       ""
                     )}
                     <legend className="sr-only">Checkboxes</legend>
-                    <div className="flex flex-col items-start gap-3">
-                      {skills.length > 0
-                        ? skills.map((skill: any, i: number) => {
-                            return (
-                              <label key={i} htmlFor={skill.uuid} className="inline-flex items-center gap-3">
-                                <input
-                                  type="checkbox"
-                                  id={skill.uuid}
-                                  onChange={(e) => aturFilterSkill(e, skill.uuid)}
-                                  checked={localSkill.includes(skill.uuid)}
-                                  className="size-5 rounded border-gray-300 hover:cursor-pointer"
-                                />
-                                <span className="text-sm font-medium text-gray-700"> {skill.nama} </span>
-                              </label>
-                            );
-                          })
-                        : ""}
-                    </div>
+                    <div className="flex flex-col items-start gap-3">{renderSkillFilters}</div>
                     <div className="flex items-center justify-between mt-3 mb-3">
                       <span className="text-sm text-gray-700 border-b-2"> Sort By</span>
                     </div>
@@ -219,27 +269,13 @@ export default function Home({ data, filterSearch, filterSkill, filterOrder }: a
           </div>
           <div className="hidden lg:grid gap-4 sm:grid-cols-2 my-6 lg:grid-cols-3">
             {projectData.map((data: any) => (
-              <CardProjects key={data.uuid} main_data={data} />
+              <MemoizedCardProjects key={data.uuid} main_data={data} />
             ))}
           </div>
-          <Splide
-            options={{
-              type: "loop",
-              perPage: 3,
-              gap: "1rem",
-              breakpoints: {
-                1024: { perPage: 2 },
-                640: { perPage: 1 },
-              },
-              pagination: false,
-              arrows: true,
-            }}
-            aria-label="Project Carousel"
-            className="my-6 lg:hidden"
-          >
-            {projectData.map((data: any) => (
-              <SplideSlide key={data.uuid}>
-                <CardProjects main_data={data} />
+          <Splide options={splideOptions} aria-label="Project Carousel" className="my-6 lg:hidden">
+            {projectData.map((project: any) => (
+              <SplideSlide key={project.uuid}>
+                <MemoizedCardProjects main_data={project} />
               </SplideSlide>
             ))}
           </Splide>

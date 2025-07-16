@@ -6,16 +6,14 @@ import AOS from "aos";
 import Modal from "react-modal";
 import Script from "next/script";
 
-if (typeof window !== "undefined") {
-  Modal.setAppElement("#__next"); // Untuk Next.js (default root ID)
-}
-
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     AOS.init({
       duration: 1000,
       once: true,
     });
+
+    Modal.setAppElement("#__next");
   }, []);
 
   return (
